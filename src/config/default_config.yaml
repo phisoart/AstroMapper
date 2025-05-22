@@ -1,0 +1,43 @@
+project:
+  name: ""
+  created_date: ""
+  last_modified: ""
+  path: ""
+
+settings:
+  image_folder: images
+  log_folder: logs
+  data_folder: data
+
+window_size:
+  window_width: 1500
+  window_height: 1100
+  image_widget_width: 899
+  log_widget_width: 599
+
+image:
+  name: ""
+  size: 0
+  width: 0
+  height: 0
+  format: ""
+  path: ""
+
+log_widget:
+  "#": true
+  "X": true
+  "Y": true
+  "Width": true
+  "Height": true
+  "Well": true
+  "Color": true
+  "Note": true
+  # TODO: 아래 width 적용
+  "#_width": 0
+  "X_width": 0
+  "Y_width": 0
+  "Width_width": 0
+  "Height_width": 0
+  "Well_width": 0
+  "Color_width": 0
+  "Note_width": 0

@@ -1,0 +1,27 @@
+QMessageBox {
+    background-color: rgb(62, 62, 62) !important;
+}
+
+QMessageBox QLabel {
+    color: white !important;
+    font-size: 13px !important;
+    padding: 10px !important;
+    background-color: transparent !important;
+    qproperty-alignment: 'AlignLeft' !important;
+    text-align: left !important;
+}
+
+QMessageBox QPushButton {
+    background-color: rgb(31, 31, 31) !important;
+    color: white !important;
+    border: 1px solid rgb(100, 100, 100) !important;
+    border-radius: 3px !important;
+    padding: 0px 0px !important;
+    padding-bottom: 5px !important;
+    min-height: 20px !important;
+    min-width: 80px !important;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: rgb(100, 50, 50) !important;
+}

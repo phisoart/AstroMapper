@@ -1,0 +1,26 @@
+QWidget#imageWidget {
+    border: none !important;
+}
+
+QSplitter QWidget#imageWidget {
+    border: none !important;
+}
+
+#openImageButton {
+    background-color: #2b2b2b;
+    color: white;
+    border: 2px solid #3b3b3b;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+}
+
+#openImageButton:hover {
+    background-color: #3b3b3b;
+    border-color: #4b4b4b;
+}
+
+#openImageButton:pressed {
+    background-color: #4b4b4b;
+} 

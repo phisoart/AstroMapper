@@ -1,0 +1,79 @@
+/* 라이선스 다이얼로그 스타일 */
+QDialog {
+    background-color: #1E1E1E;
+    color: #C0C0C0;
+}
+
+/* 텍스트 에디터 스타일 */
+QTextEdit {
+    background-color: #2D2D2D;
+    color: #C0C0C0;
+    border: 1px solid #3D3D3D;
+    border-radius: 4px;
+    padding: 10px;
+    selection-background-color: #4D4D4D;
+    selection-color: #FFFFFF;
+}
+
+/* 스크롤바 스타일 */
+QScrollBar:vertical {
+    border: none;
+    background-color: #2D2D2D;
+    width: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #4D4D4D;
+    border-radius: 5px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #5D5D5D;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: #2D2D2D;
+    height: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #4D4D4D;
+    border-radius: 5px;
+    min-width: 20px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #5D5D5D;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* 버튼 스타일 */
+QPushButton {
+    background-color: #3D3D3D;
+    color: #C0C0C0;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 15px;
+    min-width: 80px;
+}
+
+QPushButton:hover {
+    background-color: #4D4D4D;
+}
+
+QPushButton:pressed {
+    background-color: #5D5D5D;
+} 

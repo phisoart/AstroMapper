@@ -1,0 +1,14 @@
+# 모든 텍스트 파일은 자동으로 줄바꿈 통일
+* text=auto
+
+# 파이썬, 마크다운, YAML 등 주요 텍스트 파일은 LF로 강제
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.css text eol=lf
+*.html text eol=lf 

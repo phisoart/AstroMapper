@@ -1,0 +1,82 @@
+/* 타이틀바 스타일 */
+QWidget#titleBar {
+    background-color: #1E1E1E;
+    border-bottom: 1px solid #707070;
+    min-height: 30px;
+    max-height: 30px;
+    margin: 0px;
+    padding: 0px;
+}
+
+QMenuBar {
+    background-color: transparent;
+    border: none;
+    color: #C0C0C0;
+}
+
+QMenuBar::item {
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: #C0C0C0;
+}
+
+QMenuBar::item:selected {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+QMenuBar::item:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 드롭다운 메뉴 스타일 */
+QMenu {
+    background-color: #2D2D2D;
+    border: 1px solid #3D3D3D;
+    border-radius: 4px;
+    color: #C0C0C0;
+}
+
+QMenu::item {
+    padding: 5px 20px;
+    color: #C0C0C0;
+}
+
+QMenu::item:selected {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+QMenu::item:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #3D3D3D;
+    margin: 5px 0px;
+}
+
+/* 기본 버튼 스타일 */
+QPushButton {
+    border: none;
+    border-radius: 4px;
+    padding: 5px;
+    background-color: transparent;
+    color: #C0C0C0;
+}
+
+QPushButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 닫기 버튼 스타일 */
+QPushButton#closeButton:hover {
+    background-color: #e81123;
+}
+
+QPushButton#closeButton:pressed {
+    background-color: #f1707a;
+} 

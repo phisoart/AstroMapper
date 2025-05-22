@@ -1,0 +1,18 @@
+{
+    "red": "#FF0000",
+    "green": "#00FF00",
+    "blue": "#0000FF",
+    "yellow": "#FFFF00",
+    "magenta": "#FF00FF",
+    "cyan": "#00FFFF",
+    "lightgray": "#C0C0C0",
+    "darkred": "#800000",
+    "darkgreen": "#008000",
+    "darkblue": "#000080",
+    "darkyellow": "#808000",
+    "darkmagenta": "#800080",
+    "darkcyan": "#008080",
+    "darkgrey": "#808080",
+    "white": "#FFFFFF",
+    "black": "#000000"
+}

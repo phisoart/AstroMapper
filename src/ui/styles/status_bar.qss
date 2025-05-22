@@ -1,0 +1,16 @@
+/* 상태바 스타일 */
+QStatusBar {
+    background-color: transparent;
+    border: none;
+    border-top: 1px solid #707070;
+    color: #C0C0C0;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+QStatusBar QLabel {
+    color: #C0C0C0;
+    padding: 0px 5px;
+} 

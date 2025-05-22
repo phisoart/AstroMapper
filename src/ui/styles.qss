@@ -1,0 +1,162 @@
+/* 메인 윈도우 스타일 */
+QMainWindow {
+    background-color: #1e1e1e;
+}
+
+/* 커스텀 타이틀바 스타일 */
+#titleBar {
+    background-color: #2b2b2b;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#titleLabel {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#titleBar QPushButton {
+    background-color: transparent;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#titleBar QPushButton:hover {
+    background-color: #3b3b3b;
+}
+
+#titleBar QPushButton#closeButton:hover {
+    background-color: #e81123;
+}
+
+/* 메뉴바 스타일 */
+#menuBar {
+    background-color: transparent;
+    color: white;
+}
+
+#menuBar::item {
+    background-color: transparent;
+    color: white;
+    padding: 4px 10px;
+}
+
+#menuBar::item:selected {
+    background-color: #3b3b3b;
+}
+
+/* 툴바 스타일 */
+#toolBar {
+    background-color: #2b2b2b;
+    border: none;
+    spacing: 5px;
+    padding: 5px;
+}
+
+#toolBar QToolButton {
+    background-color: transparent;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+#toolBar QToolButton:hover {
+    background-color: #3b3b3b;
+}
+
+/* 상태바 스타일 */
+#statusBar {
+    background-color: #2b2b2b;
+    color: white;
+    border-top: 1px solid #3b3b3b;
+}
+
+#statusBar QLabel {
+    color: white;
+}
+
+/* 드롭다운 메뉴 스타일 */
+QMenu {
+    background-color: #2b2b2b;
+    color: white;
+    border: 1px solid #3b3b3b;
+}
+
+QMenu::item {
+    padding: 4px 20px;
+}
+
+QMenu::item:selected {
+    background-color: #3b3b3b;
+}
+
+/* 버튼 스타일 */
+QPushButton {
+    background-color: #2b2b2b;
+    color: white;
+    border: 1px solid #3b3b3b;
+    padding: 5px 15px;
+    border-radius: 3px;
+}
+
+QPushButton:hover {
+    background-color: #3b3b3b;
+}
+
+QPushButton:pressed {
+    background-color: #4b4b4b;
+}
+
+/* 스크롤바 스타일 */
+QScrollBar:vertical {
+    background-color: #2b2b2b;
+    width: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #3b3b3b;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #4b4b4b;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* 라벨 스타일 */
+QLabel {
+    color: white;
+}
+
+/* 입력 필드 스타일 */
+QLineEdit {
+    background-color: #2b2b2b;
+    color: white;
+    border: 1px solid #3b3b3b;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+QLineEdit:focus {
+    border: 1px solid #4b4b4b;
+}
+
+/* Splitter 스타일 */
+QSplitter::handle {
+    background-color: #3b3b3b;
+    width: 2px;
+    height: 2px;
+}
+
+QSplitter::handle:hover {
+    background-color: #4b4b4b;
+} 

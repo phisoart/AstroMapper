@@ -1,0 +1,94 @@
+QWidget#logWidget {
+    background-color: #222 !important;
+    border: none !important;
+}
+
+QSplitter QWidget#logWidget {
+    background-color: #0000FF !important;
+    border: none !important;
+}
+
+QLabel, QLabel[objectName="logLabel"] {
+    font-weight: bold;
+    font-size: 14px;
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    color: #ccc;
+}
+
+QLabel[objectName="logLabel"] {
+    color: #FFA726 !important;
+}
+
+QLineEdit[readOnly="true"] {
+    background: transparent !important;
+    color: #fff;
+    font-size: 12px;
+    border: none !important;
+    border-radius: 0px !important;
+    outline: none !important;
+}
+
+QCheckBox#subImageCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    background: #888;
+    border-radius: 4px;
+    border: 2px solid #888;
+}
+QCheckBox#subImageCheckBox::indicator:checked {
+    background: #FFA726;
+    border: 2px solid #FFA726;
+    image: none;
+}
+
+QPlainTextEdit {
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    border: none;
+}
+
+QFrame {
+    border: 2px solid #FFA726;
+    border-radius: 2px;
+    background: #222;
+}
+
+QPushButton {
+    background: #333;
+    color: #fff;
+    padding: 6px 18px;
+    border-radius: 4px;
+    border: none;
+}
+QPushButton:hover {
+    background: #444;
+}
+
+QSlider#subImageSlider {
+    min-height: 18px;
+    max-height: 24px;
+}
+QSlider#subImageSlider::groove:horizontal {
+    border: 1px solid #444;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+}
+QSlider#subImageSlider::handle:horizontal {
+    background:rgb(142, 125, 100);
+    border: 2px solid #fff;
+    width: 18px;
+    margin: -5px 0;
+    border-radius: 9px;
+}
+QSlider#subImageSlider::sub-page:horizontal {
+    background:rgb(142, 125, 100);
+    border-radius: 4px;
+}
+QSlider#subImageSlider::add-page:horizontal {
+    background: #444;
+    border-radius: 4px;
+} 

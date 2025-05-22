@@ -1,0 +1,73 @@
+#initContainer {
+    background-color: #2D2D2D;
+    border-radius: 10px;
+}
+
+#initContainer #appName {
+    color: #A0A0A0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#iconButton {
+    background-color: #292929;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+#iconButton:hover {
+    background-color: #404040;
+}
+
+#iconButton:pressed {
+    background-color: #404040;
+}
+
+#buttonText {
+    color: #A0A0A0;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+}
+
+#recentTitle {
+    color: #A0A0A0;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+
+QListWidget#recentList {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+QListWidget#recentList::item {
+    background: transparent;
+    border: none;
+    padding: 2px 0;
+    margin: 0;
+}
+
+QListWidget#recentList::item:hover {
+    background: #353535;
+    border-radius: 6px;
+}
+
+QLabel[class="recent-folder"] {
+    color: #bbb;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+QLabel[class="recent-path"] {
+    color: #666;
+    font-size: 11px;
+} 
