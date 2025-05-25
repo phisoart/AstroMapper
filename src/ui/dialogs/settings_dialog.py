@@ -25,10 +25,10 @@ class SettingsDialog(QtWidgets.QDialog):
             with open("res/data/point_info.json", "r", encoding="utf-8") as f:
                 point_info = json.load(f)["point_info"]
         except Exception:
-            point_info = ["#","", "X", "Y", "Width", "Height", "Well", "Color", "Note", ""]
+            point_info = ["checkbox", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
 
         for col in point_info:
-            if col != "":
+            if col != "checkbox" and col != "Delete":
                 col_widget = QtWidgets.QWidget()
                 col_vbox = QtWidgets.QVBoxLayout(col_widget)
                 col_vbox.setContentsMargins(0, 0, 0, 0)
