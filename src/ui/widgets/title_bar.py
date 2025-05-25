@@ -91,6 +91,22 @@ class TitleBar(QtWidgets.QWidget):
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.window().close)
         
+        file_menu = self.menubar.addMenu("Edit")
+        undo_action = file_menu.addAction("Undo")
+        undo_action.setShortcut("Ctrl+Z")
+        file_menu.addAction("Redo")
+        redo_action = file_menu.addAction("Redo")
+        redo_action.setShortcut("Ctrl+Y")
+        file_menu.addSeparator()
+        cut_action = file_menu.addAction("Cut")
+        cut_action.setShortcut("Ctrl+X")
+        copy_action = file_menu.addAction("Copy")
+        copy_action.setShortcut("Ctrl+C")
+        paste_action = file_menu.addAction("Paste")
+        paste_action.setShortcut("Ctrl+V")
+        
+
+
         # 도움말 메뉴
         help_menu = self.menubar.addMenu("Help")
         report_action = help_menu.addAction("Report Issue")

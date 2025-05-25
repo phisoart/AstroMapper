@@ -89,6 +89,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(main_widget)
 
         self.ROIs = ROIs()
+        self.ROIs.rois_changed.connect(self.log_widget.on_rois_changed)
         self.image_widget.ROIs = self.ROIs
         self.log_widget.ROIs = self.ROIs
 
@@ -135,6 +136,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             event: 닫기 이벤트
         """
         # 현재 윈도우 사이즈 및 splitter width 저장
+        # TODO 저장 기능 추가
         if hasattr(self, 'project_config') and self.project_config:
             size = self.size()
             self.project_config.set_window_size(size.width(), size.height())
@@ -186,6 +188,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.project_config = ProjectConfig(project_dir)
         self.image_widget.project_config = self.project_config
         self.log_widget.project_config = self.project_config
+        self.image_widget.tool_bar.project_config = self.project_config
+        self.image_widget.tool_bar.update_color_combo()
         # 최근 프로젝트 목록에 추가
         settings = Settings()
         settings.add_recent_project(project_dir)
@@ -274,3 +278,5 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         if len(display_path) > 30:
             display_path = "..." + display_path[-30:]
         self.status_bar.showLeftMessage(f"Project: {display_path}")
+
+        self.log_widget.update_log_frame()
