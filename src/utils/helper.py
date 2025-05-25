@@ -2,6 +2,7 @@ import os, sys
 import webbrowser
 from PySide6 import QtCore, QtGui
 from typing import TYPE_CHECKING
+import copy
 
 if TYPE_CHECKING:
     from ui.widgets.image_widget import ImageWidget
@@ -27,17 +28,17 @@ def open_webpage(url: str) -> None:
     webbrowser.open(url)
 
 def mousePressEvent(self: 'ImageWidget', event):
+    has_image, _ = self.project_config.get_image_settings()
     if event.button() == QtCore.Qt.LeftButton:
-        # if self.file_name and event.modifiers() == QtCore.Qt.ShiftModifier:
-        #     self.current_ROI.rect = QtCore.QRect(
-        #         int(event.pos().x()), int(event.pos().y()), 1, 1
-        #     )
-        #     self.current_ROI.color = QtGui.QColor(0, 0, 255)
-        #     self.shift_on = True
-        # elif self.file_name and event.modifiers() == QtCore.Qt.ControlModifier:
+        if has_image and event.modifiers() == QtCore.Qt.ShiftModifier:
+            self.current_ROI.rect = QtCore.QRect(
+                int(event.pos().x()), int(event.pos().y()), 1, 1
+            )
+            self.shift_on = True
+        # elif has_image and event.modifiers() == QtCore.Qt.ControlModifier:
         #     if self.marker_state != -1:
         #         self.marker_center[self.marker_state] = (
-        #             self.convert_qpoint_window2image(
+        #             convert_qpoint_window2image(
         #                 QtCore.QPoint(event.pos().x(), event.pos().y())
         #             )
         #         )
@@ -46,65 +47,73 @@ def mousePressEvent(self: 'ImageWidget', event):
         #         self.marker_state = -1
         #         self.update_marker_btns()
         # else:
-        self.dragging = True
-        self.last_pos = event.pos()
+        else:
+            self.dragging = True
+            self.last_pos = event.pos()
         event.accept()
 
+# TODO: 어펜드 잘되게
 def mouseReleaseEvent(self: 'ImageWidget', event):
     if event.button() == QtCore.Qt.LeftButton:
+        has_image, _ = self.project_config.get_image_settings()
         self.dragging = False
-#         if self.file_name and self.shift_on:
-#             self.shift_on = False
+        if has_image and self.shift_on:
+            self.shift_on = False
 
-#             # 현재 윈도우에서의 window 값
-#             xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
-#                 self.current_ROI.rect.x(), event.pos().x()
-#             )
-#             ymin, ymax = min(self.current_ROI.rect.y(), event.pos().y()), max(
-#                 self.current_ROI.rect.y(), event.pos().y()
-#             )
-#             if self.is_square:
-#                 len = min(int(xmax - xmin), int(ymax - ymin))
-#                 if (
-#                     self.current_ROI.rect.x() > event.pos().x()
-#                     and int(xmax - xmin) > len
-#                 ):
-#                     xmin = self.current_ROI.rect.x() - len
-#                 if (
-#                     self.current_ROI.rect.y() > event.pos().y()
-#                     and int(ymax - ymin) > len
-#                 ):
-#                     ymin = self.current_ROI.rect.y() - len
-#                 current_rect = QtCore.QRect(int(xmin), int(ymin), len, len)
-#             else:
-#                 current_rect = QtCore.QRect(
-#                     int(xmin), int(ymin), int(xmax - xmin), int(ymax - ymin)
-#                 )
-#             self.current_ROI.rect = self.convert_qrect_window2image(current_rect)
-#             self.ROIs.appendROI(copy.deepcopy(self.current_ROI))
-#             self.update_img(updateROIs=True)
-#             self.updateLogSignal.emit()
-#         else:
-#             self.shift_on = False
-#         event.accept()
+            # 현재 윈도우에서의 window 값
+            xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
+                self.current_ROI.rect.x(), event.pos().x()
+            )
+            ymin, ymax = min(self.current_ROI.rect.y(), event.pos().y()), max(
+                self.current_ROI.rect.y(), event.pos().y()
+            )
+            if self.is_square:
+                len = min(int(xmax - xmin), int(ymax - ymin))
+                if (
+                    self.current_ROI.rect.x() > event.pos().x()
+                    and int(xmax - xmin) > len
+                ):
+                    xmin = self.current_ROI.rect.x() - len
+                if (
+                    self.current_ROI.rect.y() > event.pos().y()
+                    and int(ymax - ymin) > len
+                ):
+                    ymin = self.current_ROI.rect.y() - len
+                current_rect = QtCore.QRect(int(xmin), int(ymin), len, len)
+            else:
+                current_rect = QtCore.QRect(
+                    int(xmin), int(ymin), int(xmax - xmin), int(ymax - ymin)
+                )
+            self.current_ROI.rect = convert_qrect_window2image(self, current_rect)
+            # hex 값을 QColor로 변환
+            color_hex = self.project_config.get_color()
+            self.current_ROI.color_name = self.project_config.get_color_name()
+            self.current_ROI.color = QtGui.QColor(color_hex)
+            self.ROIs.appendROI(copy.deepcopy(self.current_ROI))
+            self.update_img(updateROIs=True)
+            self.updateLogSignal.emit()
+        else:
+            self.shift_on = False
+        event.accept()
 
 
 def mouseMoveEvent(self: 'ImageWidget', event):
-    # if self.file_name and self.shift_on:
-    #     xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
-    #         self.current_ROI.rect.x(), event.pos().x()
-    #     )
-    #     ymin, ymax = min(self.current_ROI.rect.y(), event.pos().y()), max(
-    #         self.current_ROI.rect.y(), event.pos().y()
-    #     )
-    #     len = min(int(xmax - xmin), int(ymax - ymin))
-    #     if self.current_ROI.rect.x() > event.pos().x() and int(xmax - xmin) > len:
-    #         xmin = self.current_ROI.rect.x() - len
-    #     if self.current_ROI.rect.y() > event.pos().y() and int(ymax - ymin) > len:
-    #         ymin = self.current_ROI.rect.y() - len
-    #     self.drawing_rect = QtCore.QRect(int(xmin), int(ymin), len, len)
-    #     self.update_img()
-    #     event.accept()
+    has_image, _ = self.project_config.get_image_settings()
+    if has_image and self.shift_on:
+        xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
+            self.current_ROI.rect.x(), event.pos().x()
+        )
+        ymin, ymax = min(self.current_ROI.rect.y(), event.pos().y()), max(
+            self.current_ROI.rect.y(), event.pos().y()
+        )
+        len = min(int(xmax - xmin), int(ymax - ymin))
+        if self.current_ROI.rect.x() > event.pos().x() and int(xmax - xmin) > len:
+            xmin = self.current_ROI.rect.x() - len
+        if self.current_ROI.rect.y() > event.pos().y() and int(ymax - ymin) > len:
+            ymin = self.current_ROI.rect.y() - len
+        self.drawing_rect = QtCore.QRect(int(xmin), int(ymin), len, len)
+        self.update_img()
+        event.accept()
     if self.dragging:
         # Calculate the movement vector based on the current and last positions
         delta = event.pos() - self.last_pos
@@ -192,3 +201,68 @@ def on_double_click(self: 'ImageWidget', event):
             y = int((event.pos().y() - self.image_label.height() / 2) / self.zoom + self.tmp_center.y())
             self.tmp_center = QtCore.QPointF(x, y)
             self.update_img()
+
+def convert_qrect_window2image(self: 'ImageWidget', _window_rect):
+    if self.is_svs:
+        print("svs")
+        # TODO:svs
+        # _image_rect = QtCore.QRect(
+        #     int(max(0, (self.tmp_center.x() - (self.img_label.width() / 2 - _window_rect.x()) / self.zoom))),
+        #     int(max(0, (self.tmp_center.y() - (self.img_label.height() / 2 - _window_rect.y()) / self.zoom))),
+        #     int(min(self.img_width, _window_rect.width() / self.zoom)),
+        #     int(min(self.img_height, _window_rect.height() / self.zoom)))
+    else:
+        _image_rect = QtCore.QRect(
+            int(
+                max(
+                    0,
+                    (
+                        self.tmp_center.x()
+                        - (self.image_label.width() / 2 - _window_rect.x())
+                        / self.zoom
+                    ),
+                )
+            ),
+            int(
+                max(
+                    0,
+                    (
+                        self.tmp_center.y()
+                        - (self.image_label.height() / 2 - _window_rect.y())
+                        / self.zoom
+                    ),
+                )
+            ),
+            int(min(self.image_label.width(), _window_rect.width() / self.zoom)),
+            int(min(self.image_label.height(), _window_rect.height() / self.zoom)),
+        )
+    return _image_rect
+
+def convert_qpoint_window2image(self: 'ImageWidget', _window_point):
+    if self.is_svs:
+        print("svs")
+        # TODO:svs
+    else:
+        _image_point = QtCore.QPoint(
+            int(
+                max(
+                    0,
+                    (
+                        self.tmp_center.x()
+                        - (self.image_label.width() / 2 - _window_point.x())
+                        / self.zoom
+                    ),
+                )
+            ),
+            int(
+                max(
+                    0,
+                    (
+                        self.tmp_center.y()
+                        - (self.image_label.height() / 2 - _window_point.y())
+                        / self.zoom
+                    ),
+                )
+            ),
+        )
+    return _image_point
