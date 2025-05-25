@@ -23,7 +23,12 @@ image:
   format: ""
   path: ""
 
+tool:
+  color: "#FF0000"
+  color_name: "Red"
+
 log_widget:
+  "checkbox": true
   "#": true
   "X": true
   "Y": true
@@ -32,12 +37,5 @@ log_widget:
   "Well": true
   "Color": true
   "Note": true
-  # TODO: 아래 width 적용
-  "#_width": 0
-  "X_width": 0
-  "Y_width": 0
-  "Width_width": 0
-  "Height_width": 0
-  "Well_width": 0
-  "Color_width": 0
-  "Note_width": 0
+  "Delete": true
+  widths: [20, 40, 40, 40, 40, 40, 50, 115, 144, 24]
