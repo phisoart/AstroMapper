@@ -129,7 +129,7 @@ class ProjectConfig:
             with open("res/data/point_info.json", "r", encoding="utf-8") as f:
                 point_info = json.load(f)["point_info"]
         except Exception:
-            point_info = ["#","", "X", "Y", "Width", "Height", "Well", "Color", "Note", ""]
+            point_info = ["checkbox","#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
         
         # project_config의 log_widget 설정에서 visible 상태 가져오기
         log_widget_settings = self.config.get("log_widget", {})
@@ -162,4 +162,38 @@ class ProjectConfig:
         self.config.setdefault("window_size", {})
         self.config["window_size"]["image_widget_width"] = image_width
         self.config["window_size"]["log_widget_width"] = log_width
+        self.save_config()
+
+    def set_log_widget_widths(self, widths: list):
+        self.config.setdefault("log_widget", {})
+        self.config["log_widget"]["widths"] = widths
+        self.save_config()
+
+    def get_log_widget_widths(self) -> list:
+        print(f"widths: {self.config.get('log_widget', {}).get('widths', [])}")
+        return self.config.get("log_widget", {}).get("widths", [])
+    
+    def set_tool_color(self, color: str):
+        self.config.setdefault("tool", {})
+        self.config["tool"]["color"] = color
+        self.save_config()
+    
+    def get_color(self):
+        """현재 선택된 색상을 반환합니다."""
+        return self.config.get("tool", {}).get("color", "#FF0000")  # tool.color 값을 가져옴
+
+    def get_color_name(self):
+        """현재 선택된 색상의 이름을 반환합니다."""
+        return self.config.get("tool", {}).get("color_name", "Red")  # tool.color_name 값을 가져옴
+
+    def set_color_name(self, color_name: str):
+        """색상의 이름을 설정합니다."""
+        self.config.setdefault("tool", {})
+        self.config["tool"]["color_name"] = color_name
+        self.save_config()
+
+    def set_color(self, color: str):
+        """색상을 설정합니다."""
+        self.config.setdefault("tool", {})
+        self.config["tool"]["color"] = color
         self.save_config()
