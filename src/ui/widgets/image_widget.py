@@ -4,7 +4,7 @@ import os
 import shutil
 from utils import helper
 from utils.settings import Settings
-from core.roi.ROI import ROIs
+from core.roi.ROI import ROIs, ROI
 from ui.widgets.tool_bar import ToolBar
 class ImageWidget(QtWidgets.QWidget):
     openImgSignal = QtCore.Signal(bool)  # 사용자 정의 시그널
@@ -22,12 +22,13 @@ class ImageWidget(QtWidgets.QWidget):
         self.origin_img = None
         self.is_svs = False
         self.dragging = False
-        self.last_pos = None
         self.shift_on = False
         self.drawing_rect = QtCore.QRect()
         self.init_window_ratio = None
         self.project_config = None
         self.ROIs = ROIs()
+
+        self.is_square = True
 
         self.tmp_center = QtCore.QPointF(0, 0)
         self.zoom = 1
@@ -35,7 +36,7 @@ class ImageWidget(QtWidgets.QWidget):
         self.zoom_max = 1
         self.last_window_size = QtCore.QSize(0, 0)
         self.sub_img_size = None
-        # self.current_ROI = ROI.ROI()
+        self.current_ROI = ROI()
        
         # from settings 
         self.settings = Settings()
@@ -132,6 +133,7 @@ class ImageWidget(QtWidgets.QWidget):
                 # 이미지 파일 복사
                 shutil.copy2(file_path, new_file_path)
                 # 이미지 설정 저장
+                # TODO: 저장 기능 추가
                 if self.project_config:
                     self.project_config.save_image_info(new_file_path)
                 
@@ -193,45 +195,46 @@ class ImageWidget(QtWidgets.QWidget):
         # Show the zoomed-in area of the image in the subimage label
         has_image, _ = self.project_config.get_image_settings()
         if has_image:
-            # if updateROIs:
-            #     # TODO:svs
-            #     if self.is_svs:
-            #         print("svs")
-            #         # self.svs_thumbnail = self.svs_thumbnail_origin.copy()
-            #         # painter = QPainter(self.svs_thumbnail)
-            #     else:
-            #         self.current_img = self.origin_img.copy()
-            #         painter = QtGui.QPainter(self.current_img)
-            #     # painter.setRenderHint(QtGui.QPainter.TextAntialiasing, False)
+            if updateROIs:
+                # TODO:svs
+                if self.is_svs:
+                    print("svs")
+                    # self.svs_thumbnail = self.svs_thumbnail_origin.copy()
+                    # painter = QPainter(self.svs_thumbnail)
+                else:
+                    self.current_img = self.origin_img.copy()
+                    painter = QtGui.QPainter(self.origin_img)
+                # painter.setRenderHint(QtGui.QPainter.TextAntialiasing, False)
 
-            #     # TODO: 이미지 위에 라벨(숫자)
-            #     for iter, ROI in enumerate(self.ROIs.getROIs()):
-            #         if ROI.checked:
-            #             pen = QtGui.QPen(self.current_ROI.color, 1)
-            #             painter.setPen(pen)
-            #             half_transparent_color = QtGui.QColor(self.current_ROI.color)
-            #             half_transparent_color.setAlpha(50)
-            #             brush = QtGui.QBrush(half_transparent_color)
-            #             painter.setBrush(brush)
+                # TODO: 이미지 위에 라벨(숫자)
+                for iter, ROI in enumerate(self.ROIs.getROIs()):
+                    if ROI.checked:
+                        pen = QtGui.QPen(self.current_ROI.color, 1)
+                        painter.setPen(pen)
+                        half_transparent_color = QtGui.QColor(self.current_ROI.color)
+                        half_transparent_color.setAlpha(50)
+                        brush = QtGui.QBrush(half_transparent_color)
+                        painter.setBrush(brush)
 
-            #             # TODO: svs
-            #             # if self.is_svs:
-            #             #     tmp_downsample = self.pixmap.level_downsamples[self.pixmap.level_count - 1]
-            #             #     rects = QRect(int(rects.x() / tmp_downsample),
-            #             #                   int(rects.y() / tmp_downsample), int(rects.width() / tmp_downsample),
-            #             #                   int(rects.height() / tmp_downsample))
-            #             painter.drawRect(ROI.rect)
-            #     painter.end()
-            #     painter = QtGui.QPainter(self.current_img)
-            #     pen = QtGui.QPen(QtCore.Qt.NoPen)
-            #     painter.setPen(pen)
+                        # TODO: svs
+                        # if self.is_svs:
+                        #     tmp_downsample = self.pixmap.level_downsamples[self.pixmap.level_count - 1]
+                        #     rects = QRect(int(rects.x() / tmp_downsample),
+                        #                   int(rects.y() / tmp_downsample), int(rects.width() / tmp_downsample),
+                        #                   int(rects.height() / tmp_downsample))
+                        painter.drawRect(ROI.rect)
+                painter.end()
+                painter = QtGui.QPainter(self.origin_img)
+                pen = QtGui.QPen(QtCore.Qt.NoPen)
+                painter.setPen(pen)
 
-            #     brush = QtGui.QBrush("#F84F31")  # 내부 채우기 색상
-            #     painter.setBrush(brush)
-            #     for iter in range(self.marker_n):
-            #         if self.marker_status[iter]:
-            #             painter.drawEllipse(self.marker_center[iter], 5, 5)
-            #     painter.end()
+                brush = QtGui.QBrush("#F84F31")  # 내부 채우기 색상
+                painter.setBrush(brush)
+                # TODO: 마커 그리기
+                # for iter in range(self.marker_n):
+                #     if self.marker_status[iter]:
+                #         painter.drawEllipse(self.marker_center[iter], 5, 5)
+                painter.end()
 
             # 왼쪽 상단 point x,y 오른쪽 하단 point x,y
             # window 상에서의 좌표값.
@@ -326,11 +329,11 @@ class ImageWidget(QtWidgets.QWidget):
 
         if self.is_sub_img:
             self.update_sub_img(painter, crop_rect, self.sub_img_scale)
-        # if self.shift_on:
-        #     pen = QtGui.QPen(self.current_ROI.color, 1)
-        #     painter.setPen(pen)
-
-        #     painter.drawRect(self.drawing_rect)
+        if self.shift_on:
+            color_hex = self.project_config.get_color()
+            pen = QtGui.QPen(QtGui.QColor(color_hex), 1)
+            painter.setPen(pen)
+            painter.drawRect(self.drawing_rect)
 
                 # 십자선 그리기
         if self.cross_visible:
