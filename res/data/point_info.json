@@ -1,6 +1,6 @@
 {
     "point_info": [
-        "",
+        "checkbox",
         "#",
         "X",
         "Y",
@@ -9,6 +9,6 @@
         "Well",
         "Color",
         "Note",
-        ""
+        "Delete"
     ]
 }
