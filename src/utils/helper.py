@@ -90,7 +90,8 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
             self.current_ROI.color_name = self.project_config.get_color_name()
             self.current_ROI.color = QtGui.QColor(color_hex)
             self.ROIs.appendROI(copy.deepcopy(self.current_ROI))
-            self.update_img(updateROIs=True)
+            self.append_roi_layer(self.current_ROI)
+            self.update_img()
             self.updateLogSignal.emit()
         else:
             self.shift_on = False

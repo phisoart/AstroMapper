@@ -19,7 +19,6 @@ class ImageWidget(QtWidgets.QWidget):
         self.project_dir = None
         self.origin_img = None
         self.sub_img = None
-        self.origin_img = None
         self.is_svs = False
         self.dragging = False
         self.shift_on = False
@@ -156,6 +155,8 @@ class ImageWidget(QtWidgets.QWidget):
                 # TODO: svs제작
                 # 이미지 로드
                 self.origin_img = QtGui.QPixmap(_file_path)
+                self.roi_layer = QtGui.QPixmap(self.origin_img.size())
+                self.roi_layer.fill(QtCore.Qt.transparent)
                 self.tmp_center = QtCore.QPointF(
                     self.origin_img.width() / 2, self.origin_img.height() / 2
                 )
@@ -192,13 +193,41 @@ class ImageWidget(QtWidgets.QWidget):
                 )
                 print(str(e))
 
-    def update_roi_layer(self):
-        """ROI 레이어를 갱신 (viewport_rect: 뷰포트 최적화용)"""
+    def append_roi_layer(self, _ROI):
         if self.origin_img is None:
             return
-        size = self.origin_img.size()
-        self.roi_layer = QtGui.QPixmap(size)
-        self.roi_layer.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(self.roi_layer)
+        # pen = QtGui.QPen(_ROI.color, 1)
+
+        pen = QtGui.QPen(QtCore.Qt.NoPen)
+
+        painter.setPen(pen)
+        half_transparent_color = QtGui.QColor(_ROI.color)
+        half_transparent_color.setAlpha(50)
+        brush = QtGui.QBrush(half_transparent_color)
+        painter.setBrush(brush)
+        painter.drawRect(_ROI.rect)
+        painter.end()
+
+    def remove_roi_layer(self, _ROI):
+        if self.origin_img is None:
+            return
+        painter = QtGui.QPainter(self.roi_layer)
+        painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
+        painter.fillRect(_ROI.rect, QtCore.Qt.transparent)
+        painter.end()
+
+    def clear_roi_layer(self):
+        if self.origin_img is None:
+            return
+        painter = QtGui.QPainter(self.roi_layer)
+        painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
+        painter.fillRect(self.roi_layer.rect(), QtCore.Qt.transparent)
+        painter.end()
+
+    def update_roi_layer(self):
+        if self.origin_img is None:
+            return
         painter = QtGui.QPainter(self.roi_layer)
         for roi in self.ROIs.getROIs():
             pen = QtGui.QPen(roi.color, 1)
@@ -210,14 +239,10 @@ class ImageWidget(QtWidgets.QWidget):
             painter.drawRect(roi.rect)
         painter.end()
 
-    def update_img(self, updateROIs=False):
+    def update_img(self):
         has_image, _ = self.project_config.get_image_settings()
         if not has_image or self.origin_img is None:
             return
-
-        # ROI가 변경된 경우에만 ROI 레이어 갱신
-        if updateROIs or self.roi_layer is None:
-            self.update_roi_layer()
 
         window_img_rect, crop_rect = self.get_crop_window_rect()
 
@@ -402,3 +427,4 @@ class ImageWidget(QtWidgets.QWidget):
     def set_cross_visible(self, visible: bool):
         self.cross_visible = visible
         self.update_img()
+

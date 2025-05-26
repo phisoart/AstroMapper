@@ -16,8 +16,6 @@ class ROI:
     note: str = ""
     checked: bool = True
     well: str = ""
-    roi_layer_updated: bool = False
-
 
 class ROIs(QtCore.QObject):  # QObject 상속
     rois_changed = QtCore.Signal()  # 시그널 추가
@@ -55,7 +53,6 @@ class ROIs(QtCore.QObject):  # QObject 상속
         _ROI.y = _ROI.rect.y()
         _ROI.width = _ROI.rect.width()
         _ROI.height = _ROI.rect.height()
-        _ROI.roi_layer_updated = False
         # TODO 이전 연결해서 복사해주는 기능 추가
         if _ROI.note == "":
             _ROI.note = str(self.__len + 1)

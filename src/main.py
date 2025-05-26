@@ -54,6 +54,9 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
     log_widget.subImageChecked.connect(image_widget.on_checkbox_state_changed)
     log_widget.subImageSliderChanged.connect(image_widget.on_slider_value_changed)
     log_widget.updateImgSignal.connect(image_widget.update_img)
+    log_widget.appendROISignal.connect(image_widget.append_roi_layer)
+    log_widget.removeROISignal.connect(image_widget.remove_roi_layer)
+    log_widget.clearROISignal.connect(image_widget.clear_roi_layer)
 #     log_widget.image_upload_requested.connect(image_widget.open_image)
 #     log_widget.sub_image_check.connect(image_widget.on_checkbox_state_changed)
 #     log_widget.slider_changed.connect(image_widge t.on_slider_value_changed)
@@ -62,7 +65,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 #     log_widget.extract_signal.connect(image_widget.extract_cosmosort_protocol)
 
 # TODO
-# 2. ROIs들 이미지 형태로 만들어서 효율적으로 관리하기
 # 4. 레퍼런스 기능 추가하기
 
 

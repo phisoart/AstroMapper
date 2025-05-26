@@ -145,8 +145,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
                 sizes = self.splitter.sizes()
                 if len(sizes) >= 2:
                     self.project_config.set_splitter_widths(sizes[0], sizes[1])
-        self.project_config.update_last_modified()
-        self.save_window_state()
+            self.project_config.update_last_modified()
+            self.save_window_state()
         super().closeEvent(event)
 
     def open_project(self, _project_dir: str = None):

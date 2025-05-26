@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from utils.helper import get_resource_path
 import os
 import json
-from core.roi.ROI import ROIs  # ROI 클래스도 import
+from core.roi.ROI import ROIs, ROI  # ROI 클래스도 import
 from ui.dialogs.settings_dialog import SettingsDialog
 
 class LogRowWidget(QtWidgets.QWidget):
@@ -175,10 +175,32 @@ class LogRowWidget(QtWidgets.QWidget):
         note_edit.textChanged.connect(self.on_note_changed)
 
         # 10. X(삭제) 버튼
-        del_btn = QtWidgets.QPushButton("X")
+        del_btn = QtWidgets.QPushButton()
         del_btn.setFixedWidth(24)
-        del_btn.setStyleSheet("QPushButton { border: none !important; background: transparent !important; color: #fff !important; }")
-        splitter.addWidget(del_btn)
+        del_btn.setStyleSheet("""
+            QPushButton {
+                border: none !important;
+                background: #444 !important;
+                color: #fff !important;
+                border-radius: 12px;
+            }
+            QPushButton:hover {
+                background: #666 !important;
+            }
+            QPushButton:pressed {
+                background: #222 !important;
+            }
+        """)
+        del_btn.setIcon(QtGui.QIcon(get_resource_path(os.path.join("res", "images", "icons", "cross-circle.svg"))))
+        del_btn.setIconSize(QtCore.QSize(20, 15))
+        del_btn.clicked.connect(lambda: self.on_delete_clicked(order-1))
+        # splitter에 가운데 정렬로 추가
+        del_btn_container = QtWidgets.QWidget()
+        del_btn_layout = QtWidgets.QHBoxLayout(del_btn_container)
+        del_btn_layout.setContentsMargins(0, 0, 0, 0)
+        del_btn_layout.setAlignment(QtCore.Qt.AlignCenter)
+        del_btn_layout.addWidget(del_btn)
+        splitter.addWidget(del_btn_container)
         self.splitter_widgets.append(del_btn)
 
         layout.addWidget(splitter)
@@ -186,6 +208,12 @@ class LogRowWidget(QtWidgets.QWidget):
 
     def on_check_changed(self, state):
         self.ROI.checked = bool(state)
+        if self.parent_widget is not None and hasattr(self.parent_widget, "appendROISignal") and hasattr(self.parent_widget, "removeROISignal"):
+            if bool(state):
+                self.parent_widget.appendROISignal.emit(self.ROI)
+            else:
+                self.parent_widget.removeROISignal.emit(self.ROI)
+                
         if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
             self.parent_widget.updateImgSignal.emit(True)
 
@@ -199,15 +227,29 @@ class LogRowWidget(QtWidgets.QWidget):
         hex_code = self.color_dict.get(color_name, "#FF0000")
         self.ROI.color = QtGui.QColor(hex_code)
         self.ROI.color_name = color_name
+        if self.parent_widget is not None and hasattr(self.parent_widget, "appendROISignal") and hasattr(self.parent_widget, "removeROISignal"):
+            self.parent_widget.removeROISignal.emit(self.ROI)
+            self.parent_widget.appendROISignal.emit(self.ROI)
+
         if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
             self.parent_widget.updateImgSignal.emit(True)
+
+    def on_delete_clicked(self, order):
+        if self.parent_widget is not None and hasattr(self.parent_widget, "ROIs"):
+            self.parent_widget.ROIs.removeROI(order)
+            if self.parent_widget is not None and hasattr(self.parent_widget, "removeROISignal"):
+                self.parent_widget.removeROISignal.emit(self.ROI)
+            if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
+                self.parent_widget.updateImgSignal.emit(True)
 
 class LogWidget(QtWidgets.QWidget):
     openImgSignal = QtCore.Signal(bool)  # 사용자 정의 시그널
     subImageChecked = QtCore.Signal(bool)
     subImageSliderChanged = QtCore.Signal(int)
     updateImgSignal = QtCore.Signal(bool)
-
+    appendROISignal = QtCore.Signal(ROI)
+    removeROISignal = QtCore.Signal(ROI)
+    clearROISignal = QtCore.Signal()
 
     # setImgSignal = QtCore.Signal(str)  # 사용자 정의 시그널
     # updateLogSignal = QtCore.Signal()
@@ -527,21 +569,80 @@ class LogWidget(QtWidgets.QWidget):
     def create_btn_layout(self):
         btn_layout = QtWidgets.QHBoxLayout()
         self.save_btn = QtWidgets.QPushButton("Save")
+        self.save_btn.clicked.connect(self.on_save_clicked)
         self.load_btn = QtWidgets.QPushButton("Load")
+        self.load_btn.clicked.connect(self.on_load_clicked)
         self.clear_btn = QtWidgets.QPushButton("Clear")
+        self.clear_btn.clicked.connect(self.on_clear_clicked)
         for btn in [self.save_btn, self.load_btn, self.clear_btn]:
             btn.setStyleSheet("background: #333; color: #ccc; padding: 6px 18px; border-radius: 4px;")
             btn.setCursor(QtCore.Qt.PointingHandCursor)
-        self.save_btn.clicked.connect(self.on_save_clicked)
         btn_layout.addWidget(self.save_btn)
         btn_layout.addWidget(self.load_btn)
         btn_layout.addWidget(self.clear_btn)
         return btn_layout
 
     def on_save_clicked(self):
-        print(self.ROIs.getROIs())
-        # self.save_legend_widths()
-        # self.update_log_frame()
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.ReadOnly
+        # project_path를 기본 경로로 사용
+        default_dir = ""
+        if self.project_config is not None:
+            if hasattr(self.project_config, 'project_path'):
+                default_dir = self.project_config.project_path
+            elif hasattr(self.project_config, 'get'):
+                default_dir = self.project_config.get('project_path', "")
+        default_dir = os.path.join(default_dir, "results")
+        _file_name, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Save file",
+            default_dir,
+            "Temp Protocol File (*.tmpprotocol);",
+            options=options,
+        )
+        if _file_name:
+            with open(_file_name, "w") as file:
+                # TODO: 7. 이미지정보 받아오기
+                # file.write("[IMG]\n")
+                # file.write("name = " + _file_name + "\n")
+                # file.write("size = \n")
+                # file.write("format = \n\n")
+
+                file.write("[ROIs]\n")
+                _l = self.ROIs.__len__()
+                _str = "n = " + str(_l) + "\n"
+                file.write(_str)
+                for i in range(_l):
+                    # P_51 = "7.975;10.975;8.025;11.025;E04;"
+                    _roi = self.ROIs.getROI(i)
+                    _rect = _roi.rect
+                    _str = "P_"
+                    _str += str(i)
+                    _str += " = "
+                    _str += str(_rect.x())
+                    _str += ";"
+                    _str += str(_rect.y())
+                    _str += ";"
+                    _str += str(_rect.width())
+                    _str += ";"
+                    _str += str(_rect.height())
+                    _str += ";"
+                    _str += str(_roi.well)
+                    _str += ";"
+                    _str += str(_roi.description)
+                    _str += ";"
+                    _str += "1" if _roi.checked else "0"
+                    _str += ";\n"
+
+                    file.write(_str)
+
+    def on_load_clicked(self):
+        pass
+
+    def on_clear_clicked(self):
+        self.clearROISignal.emit()
+        self.ROIs.clearROIs()
+        self.updateImgSignal.emit(True)
 
     def on_image_opened(self, opened: bool):
         if opened:
