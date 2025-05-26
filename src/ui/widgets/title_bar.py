@@ -105,7 +105,25 @@ class TitleBar(QtWidgets.QWidget):
         paste_action = file_menu.addAction("Paste")
         paste_action.setShortcut("Ctrl+V")
         
+        protocol_menu = self.menubar.addMenu("Protocol")
+        protocol_menu.addAction("Save tmp Protocol")
+        protocol_menu.addAction("Load tmp Protocol")
+        protocol_menu.addSeparator()
+        protocol_menu.addAction("Save cxProtocol")
+        protocol_menu.addAction("Load cxProtocol")
 
+        view_menu = self.menubar.addMenu("View")
+        view_menu.addAction("Go to Reference Point 1")
+        view_menu.addAction("Go to Reference Point 2")
+        view_menu.addAction("Show Refererence Points")
+        view_menu.addSeparator()
+
+        tool_menu = self.menubar.addMenu("Tools")
+        # tool_menu.addAction("Save tmp Image")
+        # tool_menu.addAction("Load tmp Image")
+        # tool_menu.addSeparator()
+        # tool_menu.addAction("Save cxImage")
+        # tool_menu.addAction("Load cxImage")
 
         # 도움말 메뉴
         help_menu = self.menubar.addMenu("Help")
