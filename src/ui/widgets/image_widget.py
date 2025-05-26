@@ -51,6 +51,9 @@ class ImageWidget(QtWidgets.QWidget):
 
         self.cross_visible = False
 
+        # ROI 레이어 추가
+        self.roi_layer = None
+
         # 중앙 레이아웃 설정
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -169,10 +172,9 @@ class ImageWidget(QtWidgets.QWidget):
                     self.zoom = self.image_label.width() / self.origin_img.width()
                 else:
                     self.zoom = self.image_label.height() / self.origin_img.height()
-
                 self.zoom_min = self.zoom / 2
-                self.zoom_max = self.zoom * self.zoom_max_ratio                
-                # 이미지 크기 조정 (라벨 크기에 맞게)
+                self.zoom_max = self.zoom * self.zoom_max_ratio
+                self.update_roi_layer()  # ROI 레이어 초기화
                 self.update_img()
                 self.image_label.show()
                 self.tool_bar.show()
@@ -190,142 +192,51 @@ class ImageWidget(QtWidgets.QWidget):
                 )
                 print(str(e))
 
-    # TODO: 지금은 매번 너무 많이 업데이트해서 최적화 필요함.
+    def update_roi_layer(self):
+        """ROI 레이어를 갱신 (viewport_rect: 뷰포트 최적화용)"""
+        if self.origin_img is None:
+            return
+        size = self.origin_img.size()
+        self.roi_layer = QtGui.QPixmap(size)
+        self.roi_layer.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(self.roi_layer)
+        for roi in self.ROIs.getROIs():
+            pen = QtGui.QPen(roi.color, 1)
+            painter.setPen(pen)
+            half_transparent_color = QtGui.QColor(roi.color)
+            half_transparent_color.setAlpha(50)
+            brush = QtGui.QBrush(half_transparent_color)
+            painter.setBrush(brush)
+            painter.drawRect(roi.rect)
+        painter.end()
+
     def update_img(self, updateROIs=False):
-        # Show the zoomed-in area of the image in the subimage label
         has_image, _ = self.project_config.get_image_settings()
-        if has_image:
-            if updateROIs:
-                # TODO:svs
-                if self.is_svs:
-                    print("svs")
-                    # self.svs_thumbnail = self.svs_thumbnail_origin.copy()
-                    # painter = QPainter(self.svs_thumbnail)
-                else:
-                    self.current_img = self.origin_img.copy()
-                    painter = QtGui.QPainter(self.origin_img)
-                # painter.setRenderHint(QtGui.QPainter.TextAntialiasing, False)
+        if not has_image or self.origin_img is None:
+            return
 
-                # TODO: 이미지 위에 라벨(숫자)
-                for iter, ROI in enumerate(self.ROIs.getROIs()):
-                    if ROI.checked:
-                        pen = QtGui.QPen(self.current_ROI.color, 1)
-                        painter.setPen(pen)
-                        half_transparent_color = QtGui.QColor(self.current_ROI.color)
-                        half_transparent_color.setAlpha(50)
-                        brush = QtGui.QBrush(half_transparent_color)
-                        painter.setBrush(brush)
+        # ROI가 변경된 경우에만 ROI 레이어 갱신
+        if updateROIs or self.roi_layer is None:
+            self.update_roi_layer()
 
-                        # TODO: svs
-                        # if self.is_svs:
-                        #     tmp_downsample = self.pixmap.level_downsamples[self.pixmap.level_count - 1]
-                        #     rects = QRect(int(rects.x() / tmp_downsample),
-                        #                   int(rects.y() / tmp_downsample), int(rects.width() / tmp_downsample),
-                        #                   int(rects.height() / tmp_downsample))
-                        painter.drawRect(ROI.rect)
-                painter.end()
-                painter = QtGui.QPainter(self.origin_img)
-                pen = QtGui.QPen(QtCore.Qt.NoPen)
-                painter.setPen(pen)
+        window_img_rect, crop_rect = self.get_crop_window_rect()
 
-                brush = QtGui.QBrush("#F84F31")  # 내부 채우기 색상
-                painter.setBrush(brush)
-                # TODO: 마커 그리기
-                # for iter in range(self.marker_n):
-                #     if self.marker_status[iter]:
-                #         painter.drawEllipse(self.marker_center[iter], 5, 5)
-                painter.end()
-
-            # 왼쪽 상단 point x,y 오른쪽 하단 point x,y
-            # window 상에서의 좌표값.
-            img_points = QtCore.QRect(
-                int(self.image_label.width() / 2 - self.tmp_center.x() * self.zoom),
-                int(self.image_label.height() / 2 - self.tmp_center.y() * self.zoom),
-                int(
-                    self.image_label.width() / 2
-                    + (self.origin_img.width() - self.tmp_center.x()) * self.zoom
-                ),
-                int(
-                    self.image_label.height() / 2
-                    + (self.origin_img.height() - self.tmp_center.y()) * self.zoom
-                ),
-            )
-            self.img_moving(img_points)
-
-    def img_moving(self, _img_rect: QtCore.QRect):
-        # 왼쪽 상단 point x,y 오른쪽 하단 point x,y
-        # window 상에서의 좌표값.
-        zoom_img_rect = QtCore.QRect(
-            max(0, _img_rect.x()),
-            max(0, _img_rect.y()),
-            min(self.image_label.width(), _img_rect.width()),
-            min(self.image_label.height(), _img_rect.height()),
-        )
-        crop_rect = QtCore.QRect(
-            int(
-                (
-                    self.tmp_center.x()
-                    - (self.image_label.width() / 2 - zoom_img_rect.x()) / self.zoom
-                )
-            ),
-            int(
-                (
-                    self.tmp_center.y()
-                    - (self.image_label.height() / 2 - zoom_img_rect.y()) / self.zoom
-                )
-            ),
-            int((zoom_img_rect.width() - zoom_img_rect.x()) / self.zoom),
-            int((zoom_img_rect.height() - zoom_img_rect.y()) / self.zoom),
-        )
-
-        # TODO: svs
-        if self.is_svs:
-            # Convert Pillow image to numpy array
-            # cropped_pixmap = self.current_img.copy(crop_rect)
-            print("svs")
-            # cropped_pixmap = self.get_best_size_img(crop_rect)
-        else:
-            cropped_pixmap = self.origin_img.copy(crop_rect)
-
+        cropped_origin_img = self.origin_img.copy(crop_rect)
         pixmap = QtGui.QPixmap(self.image_label.width(), self.image_label.height())
         pixmap.fill(QtCore.Qt.transparent)
-
         painter = QtGui.QPainter(pixmap)
-        scaled_pixmap = cropped_pixmap.scaled(
-            zoom_img_rect.width() - zoom_img_rect.x(),
-            zoom_img_rect.height() - zoom_img_rect.y(),
+        scaled_origin_img = cropped_origin_img.scaled(
+            window_img_rect.width() - window_img_rect.x(),
+            window_img_rect.height() - window_img_rect.y(),
         )
-        painter.drawPixmap(zoom_img_rect.topLeft(), scaled_pixmap)
-
-        # TODO: svs
-        # if self.is_svs:
-        # for iter, rects in enumerate(self.log_widget.selected_rect_list):
-        #     if self.log_widget.selected_isVisualized_list[iter]:
-        #         if rects.intersects(crop_rect):
-        #             # Create a half-transparent brush with the selected color
-        #             half_transparent_color = QColor(self.log_widget.selected_color_list[iter])
-        #             half_transparent_color.setAlpha(100)
-        #             pen = QPen(Qt.white, 3)
-        #             painter.setPen(pen)
-        #             brush = QBrush(half_transparent_color)
-        #             painter.setBrush(brush)
-        #             _rect = rects.intersected(crop_rect)
-        #             _x = int((zoom_img_points[2] - zoom_img_points[0]) / crop_rect.width() * (
-        #                     _rect.x() - crop_rect.x()) + zoom_img_points[0])
-        #             _y = int((zoom_img_points[3] - zoom_img_points[1]) / crop_rect.height() * (
-        #                     _rect.y() - crop_rect.y()) + zoom_img_points[1])
-        #             _width = int((zoom_img_points[2] - zoom_img_points[0]) / crop_rect.width() * _rect.width())
-        #             _height = int((zoom_img_points[3] - zoom_img_points[1]) / crop_rect.height() * _rect.height())
-        #
-        #             painter.drawRect(QRect(_x, _y, _width, _height))
-        #
-        #             # Set the pen for drawing text
-        #             text_pen = QPen(QColor(255, 255, 255))  # white color
-        #             painter.setPen(text_pen)
-        #
-        #             # Draw the iter value inside the rectangle
-        #             painter.drawText(rects, Qt.AlignLeft | Qt.AlignTop, str(iter + 1))
-
+        painter.drawPixmap(window_img_rect.topLeft(), scaled_origin_img)
+        if self.roi_layer:
+            cropped_roi_layer = self.roi_layer.copy(crop_rect)
+            scaled_roi_layer = cropped_roi_layer.scaled(
+                window_img_rect.width() - window_img_rect.x(),
+                window_img_rect.height() - window_img_rect.y(),
+            )
+            painter.drawPixmap(window_img_rect.topLeft(), scaled_roi_layer)
 
         if self.is_sub_img:
             self.update_sub_img(painter, crop_rect, self.sub_img_scale)
@@ -335,7 +246,7 @@ class ImageWidget(QtWidgets.QWidget):
             painter.setPen(pen)
             painter.drawRect(self.drawing_rect)
 
-                # 십자선 그리기
+        # 십자선 그리기
         if self.cross_visible:
             pen = QtGui.QPen(QtGui.QColor('red'), 2)
             painter.setPen(pen)
@@ -346,9 +257,6 @@ class ImageWidget(QtWidgets.QWidget):
         painter.end()
 
         self.image_label.setPixmap(pixmap)
-
-
-        
 
     def update_sub_img(self, _painter, _crop_rect, sub_img_scale):
         brush = QtGui.QBrush(QtCore.Qt.NoBrush)
@@ -377,18 +285,11 @@ class ImageWidget(QtWidgets.QWidget):
                     / self.origin_img.width()
                 ),
             ]
-        if self.is_svs:
-            # TODO:svs
-            print("svs")
-            # _painter.drawPixmap(self.image_label.width() - _sub_img_rect[0],
-            #                     self.image_label.height() - _sub_img_rect[1],
-            #                     self.svs_thumbnail.scaled(_sub_img_rect[0], _sub_img_rect[1]))
-        else:
-            _painter.drawPixmap(
-                self.image_label.width() - _sub_img_rect[0],
-                self.image_label.height() - _sub_img_rect[1],
-                self.origin_img.scaled(_sub_img_rect[0], _sub_img_rect[1]),
-            )
+        _painter.drawPixmap(
+            self.image_label.width() - _sub_img_rect[0],
+            self.image_label.height() - _sub_img_rect[1],
+            self.origin_img.scaled(_sub_img_rect[0], _sub_img_rect[1]),
+        )
         # Draw the edge
         pen = QtGui.QPen(self.sub_img_border_color, self.sub_img_border_width)
         _painter.setPen(pen)
@@ -436,6 +337,49 @@ class ImageWidget(QtWidgets.QWidget):
             ),
         )
         _painter.drawRect(roi_rect)
+
+    def get_crop_window_rect(self):
+        # 왼쪽 상단 point x,y 오른쪽 하단 point x,y
+        # window 상에서의 좌표값.
+        _img_rect = QtCore.QRect(
+            int(self.image_label.width() / 2 - self.tmp_center.x() * self.zoom),
+            int(self.image_label.height() / 2 - self.tmp_center.y() * self.zoom),
+            int(
+                self.image_label.width() / 2
+                + (self.origin_img.width() - self.tmp_center.x()) * self.zoom
+            ),
+            int(
+                self.image_label.height() / 2
+                + (self.origin_img.height() - self.tmp_center.y()) * self.zoom
+            ),
+        )
+
+        window_img_rect = QtCore.QRect(
+            max(0, _img_rect.x()),
+            max(0, _img_rect.y()),
+            min(self.image_label.width(), _img_rect.width()),
+            min(self.image_label.height(), _img_rect.height()),
+        )
+
+        crop_rect = QtCore.QRect(
+            int(
+                (
+                    self.tmp_center.x()
+                    - (self.image_label.width() / 2 - window_img_rect.x()) / self.zoom
+                )
+            ),
+            int(
+                (
+                    self.tmp_center.y()
+                    - (self.image_label.height() / 2 - window_img_rect.y()) / self.zoom
+                )
+            ),
+            int((window_img_rect.width() - window_img_rect.x()) / self.zoom),
+            int((window_img_rect.height() - window_img_rect.y()) / self.zoom),
+        )
+
+        return window_img_rect, crop_rect
+
     def on_slider_value_changed(self, value):
         self.set_sub_img_scale(value / 100 + 0.5)
         self.update_img()
