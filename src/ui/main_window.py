@@ -169,7 +169,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             return
 
         # project_config.yaml 파일이 이미 존재하는지 확인
-        config_path = os.path.join(project_dir, "project_config.yaml")
+        config_path = os.path.join(project_dir, "settings", "project_config.yaml")
         if not os.path.exists(config_path):
             msg_box = QtWidgets.QMessageBox(self)
             msg_box.setWindowTitle("Error")
@@ -237,7 +237,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             return
         
         # project_config.yaml 파일이 이미 존재하는지 확인
-        config_path = os.path.join(project_dir, "project_config.yaml")
+        config_path = os.path.join(project_dir, "settings", "project_config.yaml")
         if os.path.exists(config_path):
             msg_box = QtWidgets.QMessageBox(self)
             msg_box.setWindowTitle("Error")

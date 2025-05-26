@@ -262,7 +262,20 @@ class LogWidget(QtWidgets.QWidget):
         self.project_config = None
         self.legend_widgets = []
         self.log_rows = []
+        style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
+        if os.path.exists(style_path):
+            with open(style_path, "r", encoding="utf-8") as f:
+                self.message_box_style = f.read()
 
+        try:
+            with open("res/data/color.json", "r", encoding="utf-8") as f:
+                self.color_dict = json.load(f)
+        except Exception:
+            self.color_dict = {
+                "Red": "#FF0000",
+                "Green": "#00FF00",
+                "Blue": "#0000FF"
+            }
         # 전체 위젯 및 주요 성분 테두리 제거 스타일 적용
         self.setStyleSheet('''
             QWidget#logWidget, QFrame, QSplitter, QLabel, QLineEdit, QComboBox, QPushButton, QCheckBox {
@@ -593,6 +606,11 @@ class LogWidget(QtWidgets.QWidget):
             elif hasattr(self.project_config, 'get'):
                 default_dir = self.project_config.get('project_path', "")
         default_dir = os.path.join(default_dir, "results")
+        # results/tmp 폴더가 없으면 생성
+        tmp_dir = os.path.join(default_dir, "tmp")
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir, exist_ok=True)
+        default_dir = tmp_dir
         _file_name, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "Save file",
@@ -602,42 +620,134 @@ class LogWidget(QtWidgets.QWidget):
         )
         if _file_name:
             with open(_file_name, "w") as file:
-                # TODO: 7. 이미지정보 받아오기
-                # file.write("[IMG]\n")
-                # file.write("name = " + _file_name + "\n")
-                # file.write("size = \n")
-                # file.write("format = \n\n")
+                # 이미지 정보 저장
+                has_image, image_settings = self.project_config.get_image_settings() if self.project_config else (False, None)
+                if has_image and image_settings:
+                    file.write("[IMG]\n")
+                    file.write(f"name = {image_settings.get('name', '')}\n")
+                    file.write(f"size = {image_settings.get('width', '')}x{image_settings.get('height', '')}\n")
+                    file.write(f"format = {image_settings.get('format', '')}\n")
+                    file.write(f"filesize = {image_settings.get('size', '')}\n\n")
 
                 file.write("[ROIs]\n")
                 _l = self.ROIs.__len__()
                 _str = "n = " + str(_l) + "\n"
                 file.write(_str)
                 for i in range(_l):
-                    # P_51 = "7.975;10.975;8.025;11.025;E04;"
+                    # P_51 = "7.975;10.975;8.025;11.025;E04;Red;TNBC;1"
                     _roi = self.ROIs.getROI(i)
-                    _rect = _roi.rect
                     _str = "P_"
-                    _str += str(i)
-                    _str += " = "
-                    _str += str(_rect.x())
-                    _str += ";"
-                    _str += str(_rect.y())
-                    _str += ";"
-                    _str += str(_rect.width())
-                    _str += ";"
-                    _str += str(_rect.height())
-                    _str += ";"
-                    _str += str(_roi.well)
-                    _str += ";"
-                    _str += str(_roi.description)
-                    _str += ";"
+                    _str += str(i) + " = "
+                    _str += str(_roi.x) + ";"
+                    _str += str(_roi.y) + ";"
+                    _str += str(_roi.width) + ";"
+                    _str += str(_roi.height) + ";"
+                    _str += str(_roi.well) + ";"
+                    _str += str(_roi.color_name) + ";"
+                    _str += str(_roi.note) + ";"
                     _str += "1" if _roi.checked else "0"
                     _str += ";\n"
 
                     file.write(_str)
 
     def on_load_clicked(self):
-        pass
+        default_dir = ""
+        if self.project_config is not None:
+            if hasattr(self.project_config, 'project_path'):
+                default_dir = self.project_config.project_path
+            elif hasattr(self.project_config, 'get'):
+                default_dir = self.project_config.get('project_path', "")
+        default_dir = os.path.join(default_dir, "results")
+        # results/tmp 폴더가 없으면 생성
+        tmp_dir = os.path.join(default_dir, "tmp")
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir, exist_ok=True)
+
+        # Show the file dialog to select a file
+        self.file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Open tmp protocol", tmp_dir, "tmp protocol Files (*.tmpprotocol)"
+        )
+        if self.file_name:
+            try:
+                with open(self.file_name, "r", encoding="utf-8") as file:
+                    content = file.read()
+                # [IMG] 섹션 파싱
+                img_section = content.split('[IMG]')[1].split('[ROIs]')[0].strip()
+                img_info = {}
+                for line in img_section.splitlines():
+                    if '=' in line:
+                        k, v = line.split('=', 1)
+                        img_info[k.strip()] = v.strip()
+                # 현재 이미지 정보와 비교
+                has_image, image_settings = self.project_config.get_image_settings() if self.project_config else (False, None)
+                if not has_image or not image_settings:
+                    msg_box = QtWidgets.QMessageBox(self)
+                    msg_box.setWindowTitle("Error")
+                    msg_box.setText("No image loaded in project.")
+                    msg_box.setStyleSheet(self.message_box_style)
+                    # 모든 자식 위젯에 스타일 강제 적용
+                    for child in msg_box.findChildren(QtWidgets.QWidget):
+                        child.setStyleSheet(self.message_box_style)
+                    msg_box.exec()
+                    return
+                # 비교: 이름, 사이즈, 포맷, 용량
+                cur_name = str(image_settings.get('name', ''))
+                cur_size = f"{image_settings.get('width', '')}x{image_settings.get('height', '')}"
+                cur_format = str(image_settings.get('format', ''))
+                cur_filesize = str(image_settings.get('size', ''))
+                if not (img_info.get('name') == cur_name and img_info.get('size') == cur_size and img_info.get('format') == cur_format and img_info.get('filesize') == cur_filesize):
+                    msg_box = QtWidgets.QMessageBox(self)
+                    msg_box.setWindowTitle("Error")
+                    msg_box.setText("Image info in protocol file does not match current project!\n\nCurrent: {} {} {} {}\nFile: {} {} {} {}".format(cur_name, cur_size, cur_format, cur_filesize, img_info.get('name'), img_info.get('size'), img_info.get('format'), img_info.get('filesize')))
+                    msg_box.setStyleSheet(self.message_box_style)
+                    # 모든 자식 위젯에 스타일 강제 적용
+                    for child in msg_box.findChildren(QtWidgets.QWidget):
+                        child.setStyleSheet(self.message_box_style)
+                    msg_box.exec()
+                    return
+                # [ROIs] 섹션 파싱
+                rois_section = content.split('[ROIs]')[1].strip()
+                lines = rois_section.splitlines()
+                n = 0
+                for line in lines:
+                    if line.startswith('n ='):
+                        n = int(line.split('=')[1].strip())
+                        break
+                self.ROIs.clearROIs()
+                for line in lines:
+                    if line.startswith('P_'):
+                        # P_0 = 157;135;90;90;A01;Red;1;1;
+                        parts = line.split('=', 1)[1].strip().split(';')
+                        if len(parts) < 8:
+                            continue
+                        x = int(parts[0])
+                        y = int(parts[1])
+                        w = int(parts[2])
+                        h = int(parts[3])
+                        well = parts[4]
+                        color_name = parts[5]
+                        note = parts[6]
+                        checked = parts[7] == '1'
+                        roi = ROI()
+                        roi.x = x
+                        roi.y = y
+                        roi.width = w
+                        roi.height = h
+                        roi.rect = QtCore.QRect(x, y, w, h)
+                        roi.well = well
+                        roi.color_name = color_name
+                        roi.color = QtGui.QColor(self.color_dict.get(color_name, "#FF0000"))
+                        roi.note = note
+                        roi.checked = checked
+                        self.ROIs.appendROI(roi)
+                # self.update_log_entries()
+                self.updateImgSignal.emit(True)
+            except Exception as e:
+                msg_box = QtWidgets.QMessageBox(self)
+                msg_box.setWindowTitle("Error")
+                msg_box.setText(f"Failed to load protocol file: {e}")
+                msg_box.setStyleSheet(self.message_box_style)
+                msg_box.exec()
 
     def on_clear_clicked(self):
         self.clearROISignal.emit()
@@ -699,7 +809,6 @@ class LogWidget(QtWidgets.QWidget):
             self.sync_row_splitters(0, 0)  # pos와 index는 사용하지 않으므로 0으로 설정
             
     def on_rois_changed(self):        
-        # # 2. 로그 엔트리 업데이트
         self.update_log_entries() 
         # # 3. 변경 사항 저장 (필요한 경우)
         # self.save_rois_state()

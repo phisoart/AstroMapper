@@ -17,7 +17,7 @@ class ProjectConfig:
             project_path: 프로젝트 루트 디렉토리 경로
         """
         self.project_path = project_path
-        self.config_path = os.path.join(project_path, "project_config.yaml")
+        self.config_path = os.path.join(project_path, "settings", "project_config.yaml")
         self.config: Dict = {}
         
         # 설정 파일이 없으면 새로 생성
