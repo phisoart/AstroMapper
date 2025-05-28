@@ -3,17 +3,23 @@ from utils.helper import get_resource_path
 import os
 import json
 
+
 class LogRowWidget(QtWidgets.QWidget):
+    selectedChanged = QtCore.Signal(object, object)  # (self, modifiers)
+    centerToROI = QtCore.Signal(int, int)  # x, y 중심 좌표
     def __init__(self, order, ROI, parent=None):
         super().__init__(parent)
         self.parent_widget = parent
         self.ROI = ROI  # ROI 객체를 멤버로 저장
+        self.selected = False
         self.setMinimumHeight(28)
         self.setObjectName("logRowWidget")
+        self.setCursor(QtCore.Qt.PointingHandCursor)
         # 호버 효과를 위한 스타일시트 추가
         self.setStyleSheet("""
             QWidget#logRowWidget {
                 background: #222222 !important;
+                border: none !important;
             }
             QWidget#logRowWidget:hover {
                 background: #333333 !important;
@@ -240,4 +246,43 @@ class LogRowWidget(QtWidgets.QWidget):
             if self.parent_widget is not None and hasattr(self.parent_widget, "removeROISignal"):
                 self.parent_widget.removeROISignal.emit(self.ROI)
             if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
-                self.parent_widget.updateImgSignal.emit(True) 
+                self.parent_widget.updateImgSignal.emit(True)
+
+    def set_selected(self, selected: bool):
+        self.selected = selected
+        # if selected:
+        #     self.setStyleSheet("""
+        #         QWidget#logRowWidget {
+        #             background: #222222 !important;
+        #             border: 2px solid #FFA726 !important;
+        #         }
+        #         QWidget#logRowWidget:hover {
+        #             background: #ffffff !important;
+        #         }
+        #     """)
+        # else:
+        #     self.setStyleSheet("""
+        #         QWidget#logRowWidget {
+        #             background: #222222 !important;
+        #             border: none !important;
+        #         }
+        #         QWidget#logRowWidget:hover {
+        #             background: #ffffff !important;
+        #         }
+        #     """)
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            modifiers = QtWidgets.QApplication.keyboardModifiers()
+            self.selectedChanged.emit(self, modifiers)
+        super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        # ROI 중심 좌표 계산 후 시그널 emit
+        cx = int(self.ROI.x + self.ROI.width / 2)
+        cy = int(self.ROI.y + self.ROI.height / 2)
+        self.centerToROI.emit(cx, cy)
+        super().mouseDoubleClickEvent(event)
+
+    def contextMenuEvent(self, event):
+        self.parent_widget.show_row_context_menu(self, event.globalPos())

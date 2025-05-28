@@ -51,6 +51,7 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
     log_widget.appendROISignal.connect(image_widget.append_roi_layer)
     log_widget.removeROISignal.connect(image_widget.remove_roi_layer)
     log_widget.clearROISignal.connect(image_widget.clear_roi_layer)
+    log_widget.moveImageSignal.connect(image_widget.move_image)
 #     log_widget.image_upload_requested.connect(image_widget.open_image)
 #     log_widget.sub_image_check.connect(image_widget.on_checkbox_state_changed)
 #     log_widget.slider_changed.connect(image_widge t.on_slider_value_changed)
@@ -59,19 +60,22 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 #     log_widget.extract_signal.connect(image_widget.extract_cosmosort_protocol)
 
 # TODO
-# lOG에 HOVER기능 추가
-# 3. ROI 클릭하면 해당 부분으로 이동하기
 # 소팅기능 추가
-# 웰 이어서 기능 추가
-# ROI들 드래거블하게 및 오른쪽 클릭통한 기능 추가
-
-# 4. 레퍼런스 기능 추가하기 - reference dialog 기능 추가
-# save dialog 기능 추가
-# 6. ROIs들 이미지 출력하는 기능 추가
 
 # TOOL에 네모로 영역추가 넣기
 
-# 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
+# 디자인 파일 정리하기
+# lOG에 HOVER기능 추가
+
+
+
+# TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
+
+# 4. 레퍼런스 기능 추가하기 - reference dialog 기능 추가
+
+# save dialog 기능 추가
+# 6. ROIs들 이미지 출력하는 기능 추가
+
 # 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
 
 
@@ -81,7 +85,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 # 7. 라지 이미지 대응
 
 # 버전 체크 기능 추가
-# 디자인 파일 정리하기
 # 세이브 기능 구현
 # 로그는 프로젝트파일에 저장하도록
 # 11. 셀소터 및 이미지 분석 기능 추가.

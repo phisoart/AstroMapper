@@ -15,6 +15,7 @@ class LogWidget(QtWidgets.QWidget):
     appendROISignal = QtCore.Signal(ROI)
     removeROISignal = QtCore.Signal(ROI)
     clearROISignal = QtCore.Signal()
+    moveImageSignal = QtCore.Signal(int, int)
 
     # setImgSignal = QtCore.Signal(str)  # 사용자 정의 시그널
     # updateLogSignal = QtCore.Signal()
@@ -27,6 +28,7 @@ class LogWidget(QtWidgets.QWidget):
         self.project_config = None
         self.legend_widgets = []
         self.log_rows = []
+        self.selected_rows = []
         style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
         if os.path.exists(style_path):
             with open(style_path, "r", encoding="utf-8") as f:
@@ -625,6 +627,8 @@ class LogWidget(QtWidgets.QWidget):
                 handle.setEnabled(False)
                 handle.setStyleSheet("background: transparent !important;")
             row.splitter.setSizes(self.legend_splitter.sizes())
+            row.selectedChanged.connect(self.on_row_selected)
+            row.centerToROI.connect(self.on_center_to_roi)
             self.log_rows.append(row)
             self.scroll_layout.addWidget(row)
 
@@ -639,5 +643,119 @@ class LogWidget(QtWidgets.QWidget):
     def show_reference_point_dialog(self):
         dialog = ReferencePointDialog(self)
         dialog.exec()
+
+    def on_row_selected(self, row_widget, modifiers):
+        if modifiers == QtCore.Qt.ControlModifier:
+            # Ctrl: 토글 선택
+            if row_widget in self.selected_rows:
+                self.selected_rows.remove(row_widget)
+                row_widget.set_selected(False)
+            else:
+                self.selected_rows.append(row_widget)
+                row_widget.set_selected(True)
+        elif modifiers == QtCore.Qt.ShiftModifier and self.selected_rows:
+            # Shift: 범위 선택
+            last_idx = self.log_rows.index(self.selected_rows[-1])
+            this_idx = self.log_rows.index(row_widget)
+            start, end = sorted([last_idx, this_idx])
+            for i in range(start, end+1):
+                r = self.log_rows[i]
+                if r not in self.selected_rows:
+                    self.selected_rows.append(r)
+                    r.set_selected(True)
+        else:
+            # 단일 선택
+            for r in self.selected_rows:
+                r.set_selected(False)
+            self.selected_rows = [row_widget]
+            row_widget.set_selected(True)
+        # 선택된 row들의 index 출력
+        selected_indices = [self.log_rows.index(r) for r in self.selected_rows]
+        print(f"선택된 row index: {selected_indices}")
+
+    def show_row_context_menu(self, clicked_row, global_pos):
+        # If the right-clicked row is not selected, select only that row
+        if clicked_row not in self.selected_rows:
+            for r in self.selected_rows:
+                r.set_selected(False)
+            self.selected_rows = [clicked_row]
+            clicked_row.set_selected(True)
+        if clicked_row and clicked_row in self.selected_rows:
+            menu = QtWidgets.QMenu(self)
+            # 0. Check/Uncheck (based on first row)
+            first_checked = self.selected_rows[0].ROI.checked
+            check_action = menu.addAction("Check" if not first_checked else "Uncheck")
+            # 1. Delete
+            delete_action = menu.addAction("Delete selected ROI(s)")
+            # 2. Color change (from color_dict)
+            color_menu = menu.addMenu("Change Color")
+            color_action_map = {}
+            for color_name, color_hex in self.color_dict.items():
+                color_action = QtGui.QAction(color_name, self)
+                pixmap = QtGui.QPixmap(16, 16)
+                pixmap.fill(QtGui.QColor(color_hex))
+                color_action.setIcon(QtGui.QIcon(pixmap))
+                color_menu.addAction(color_action)
+                color_action_map[color_action] = (color_name, color_hex)
+            # 3. Well change (from well list)
+            well_menu = menu.addMenu("Change Well")
+            try:
+                from utils.helper import get_resource_path
+                import os, json
+                well_info_path = get_resource_path(os.path.join("res", "data", "well_info.json"))
+                with open(well_info_path, "r", encoding="utf-8") as f:
+                    well_data = json.load(f)
+                    well_options = well_data.get("96well", [])
+            except Exception:
+                well_options = ["A01", "B01", "C01", "D01", "E01", "F01", "G01", "H01"]
+            well_action_map = {}
+            for well in well_options:
+                well_action = QtGui.QAction(well, self)
+                well_menu.addAction(well_action)
+                well_action_map[well_action] = well
+            # 4. Note change (input dialog)
+            note_action = menu.addAction("Change Note...")
+            action = menu.exec(global_pos)
+            # 0. Check/Uncheck
+            if action == check_action:
+                new_checked = not first_checked
+                for row in self.selected_rows:
+                    row.ROI.checked = new_checked
+                    if hasattr(row.splitter_widgets[0], 'setChecked'):
+                        row.splitter_widgets[0].setChecked(new_checked)
+            # 1. Delete
+            elif action == delete_action:
+                for row in list(self.selected_rows):
+                    idx = self.log_rows.index(row)
+                    self.ROIs.removeROI(idx)
+                self.update_log_entries()
+            # 2. Color change
+            elif action in color_action_map:
+                color_name, color_hex = color_action_map[action]
+                for row in self.selected_rows:
+                    row.ROI.color = QtGui.QColor(color_hex)
+                    row.ROI.color_name = color_name
+                    if hasattr(row.splitter_widgets[7], 'setCurrentText'):
+                        row.splitter_widgets[7].setCurrentText(color_name)
+            # 3. Well change
+            elif action in well_action_map:
+                well_name = well_action_map[action]
+                for row in self.selected_rows:
+                    row.ROI.well = well_name
+                    if hasattr(row.splitter_widgets[6], 'setCurrentText'):
+                        row.splitter_widgets[6].setCurrentText(well_name)
+            # 4. Note change
+            elif action == note_action:
+                text, ok = QtWidgets.QInputDialog.getText(self, "Batch Change Note", "Enter new note value:")
+                if ok:
+                    for row in self.selected_rows:
+                        row.ROI.note = text
+                        if hasattr(row.splitter_widgets[8], 'setText'):
+                            row.splitter_widgets[8].setText(text)
+
+    def on_center_to_roi(self, x, y):
+        # TODO: 실제 이미지 이동 함수와 연결
+        print(f"Move image center to: ({x}, {y})")
+        self.moveImageSignal.emit(x, y)
 
     

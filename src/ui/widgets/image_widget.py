@@ -428,3 +428,6 @@ class ImageWidget(QtWidgets.QWidget):
         self.cross_visible = visible
         self.update_img()
 
+    def move_image(self, x, y):
+        self.tmp_center = QtCore.QPointF(x, y)
+        self.update_img()

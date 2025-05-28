@@ -7,13 +7,14 @@ class ToolBar(QtWidgets.QToolBar):
     """메인 툴바 위젯입니다."""
     
     crossToggled = QtCore.Signal(bool)
-    
+    sameWellToggled = QtCore.Signal(bool)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("toolBar")
         self.setMovable(False)
         self.cross_on = False
         self.project_config = None
+        self.same_well_on = False
         self.init_ui()
     
     def init_ui(self):
@@ -30,7 +31,16 @@ class ToolBar(QtWidgets.QToolBar):
         self.color_combo = self.create_color_combo()
         self.addWidget(self.color_combo)
         self.color_combo.currentTextChanged.connect(self.on_color_changed)
-    
+
+        self.addSeparator()
+        self.same_well_action = self.addAction("Same Well")
+        self.same_well_action.triggered.connect(self.toggle_same_well)
+        self.same_well_action.setCheckable(self.same_well_on)
+
+    def toggle_same_well(self):
+        self.same_well_on = not self.same_well_on
+        self.sameWellToggled.emit(self.same_well_on)
+
     def toggle_cross(self):
         self.cross_on = not self.cross_on
         self.crossToggled.emit(self.cross_on)

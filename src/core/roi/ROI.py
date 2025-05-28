@@ -24,6 +24,7 @@ class ROIs(QtCore.QObject):  # QObject 상속
         super().__init__()  # QObject 초기화
         self.__len = 0  # Private 속성
         self.__ROIs = []  # Private 속성
+        self.is_same_well = False
         
         # well_positions 로드
         try:
@@ -62,9 +63,12 @@ class ROIs(QtCore.QObject):  # QObject 상속
             else:
                 prev_well = self.__ROIs[-1].well
                 if prev_well in self.well_positions:
-                    idx = self.well_positions.index(prev_well)
-                    next_idx = (idx + 1) % len(self.well_positions)
-                    _ROI.well = self.well_positions[next_idx]
+                    if self.is_same_well:
+                        _ROI.well = prev_well
+                    else:
+                        idx = self.well_positions.index(prev_well)
+                        next_idx = (idx + 1) % len(self.well_positions)
+                        _ROI.well = self.well_positions[next_idx]
                 else:
                     _ROI.well = "A01"
         self.__ROIs.append(_ROI)
@@ -86,3 +90,7 @@ class ROIs(QtCore.QObject):  # QObject 상속
         self.__ROIs = []
         self.__len = 0  # 리스트의 길이를 0으로 재설정
         self.rois_changed.emit()  # 시그널 발생
+
+    def set_is_same_well(self, is_same_well):
+        print(f"set_is_same_well: {is_same_well}")
+        self.is_same_well = is_same_well
