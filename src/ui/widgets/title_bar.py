@@ -9,6 +9,7 @@ class TitleBar(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("titleBar")
+        print(self.window().size())
         self.setFixedHeight(30)
         self.load_styles()
         self.init_ui()

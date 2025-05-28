@@ -5,6 +5,8 @@ from typing import Dict, List, Optional, Tuple
 import os
 from PIL import Image
 import json
+import sys
+from utils import get_resource_path
 
 class ProjectConfig:
     """프로젝트 설정을 관리하는 클래스입니다."""
@@ -112,6 +114,14 @@ class ProjectConfig:
             return False, None
         return True, image_settings
 
+    def get_window_size(self) -> Dict:
+        """프로젝트 설정을 반환합니다."""
+        # OS별 설정 이름 생성
+        os_specific_name = "window_size" + "_{'mac' if sys.platform == 'darwin' else 'windows'}"
+        
+        # OS별 설정이 있으면 해당 설정 반환, 없으면 기본 설정 반환
+        return self.config.get(os_specific_name, {})
+    
     def get_settings(self, _settings_name: str) -> Dict:
         """프로젝트 설정을 반환합니다."""
         return self.config.get(_settings_name, {})
@@ -126,7 +136,8 @@ class ProjectConfig:
             list: 각 컬럼의 visible 상태 리스트
         """
         try:
-            with open("res/data/point_info.json", "r", encoding="utf-8") as f:
+            point_info_path = get_resource_path(os.path.join("res", "data", "point_info.json"))
+            with open(point_info_path, "r", encoding="utf-8") as f:
                 point_info = json.load(f)["point_info"]
         except Exception:
             point_info = ["checkbox","#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
@@ -150,18 +161,22 @@ class ProjectConfig:
             width (int): 윈도우 너비
             height (int): 윈도우 높이
         """
-        self.config.setdefault("window_size", {})
-        self.config["window_size"]["window_width"] = width
-        self.config["window_size"]["window_height"] = height
+        os_specific_name = "window_size" +"_{'mac' if sys.platform == 'darwin' else 'windows'}"
+
+        self.config.setdefault(os_specific_name, {})
+        self.config[os_specific_name]["window_width"] = width
+        self.config[os_specific_name]["window_height"] = height
         self.save_config()
 
     def set_splitter_widths(self, image_width: int, log_width: int):
         """
         splitter의 각 위젯(이미지, 로그)의 width를 config에 저장합니다.
         """
-        self.config.setdefault("window_size", {})
-        self.config["window_size"]["image_widget_width"] = image_width
-        self.config["window_size"]["log_widget_width"] = log_width
+        os_specific_name = "window_size" +"_{'mac' if sys.platform == 'darwin' else 'windows'}"
+
+        self.config.setdefault(os_specific_name, {})
+        self.config[os_specific_name]["image_widget_width"] = image_width
+        self.config[os_specific_name]["log_widget_width"] = log_width
         self.save_config()
 
     def set_log_widget_widths(self, widths: list):

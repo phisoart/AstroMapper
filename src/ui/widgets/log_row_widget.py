@@ -22,7 +22,8 @@ class LogRowWidget(QtWidgets.QWidget):
 
         # Well/Color 옵션 로드
         try:
-            with open("res/data/well_info.json", "r", encoding="utf-8") as f:
+            well_info_path = get_resource_path(os.path.join("res", "data", "well_info.json"))
+            with open(well_info_path, "r", encoding="utf-8") as f:
                 well_data = json.load(f)
                 well_options = well_data.get("96well", [])
         except Exception:
@@ -117,7 +118,8 @@ class LogRowWidget(QtWidgets.QWidget):
 
         # 8. Color 콤보박스
         try:
-            with open("res/data/color.json", "r", encoding="utf-8") as f:
+            color_info_path = get_resource_path(os.path.join("res", "data", "color.json"))
+            with open(color_info_path, "r", encoding="utf-8") as f:
                 self.color_dict = json.load(f)
         except Exception:
             self.color_dict = {

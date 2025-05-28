@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 import json
+from utils import get_resource_path
 
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -22,7 +23,8 @@ class SettingsDialog(QtWidgets.QDialog):
 
         # point_info에서 빈 문자열이 아닌 항목들만 가져오기
         try:
-            with open("res/data/point_info.json", "r", encoding="utf-8") as f:
+            point_info_path = get_resource_path(os.path.join("res", "data", "point_info.json"))
+            with open(point_info_path, "r", encoding="utf-8") as f:
                 point_info = json.load(f)["point_info"]
         except Exception:
             point_info = ["checkbox", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]

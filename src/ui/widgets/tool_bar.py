@@ -38,7 +38,8 @@ class ToolBar(QtWidgets.QToolBar):
     def create_color_combo(self):
         # color_combo 추가
         try:
-            with open("res/data/color.json", "r", encoding="utf-8") as f:
+            color_info_path = get_resource_path(os.path.join("res", "data", "color.json"))
+            with open(color_info_path, "r", encoding="utf-8") as f:
                 self.color_dict = json.load(f)
         except Exception:
             self.color_dict = {

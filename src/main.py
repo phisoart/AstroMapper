@@ -1,10 +1,10 @@
 import sys
-import os
 from utils import get_resource_path
 from ui import AstromapperMainWindow, ImageWidget, LogWidget
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import QResource
 import logging
+import os
 import traceback
 
 def setup_application():
@@ -22,13 +22,7 @@ def setup_application():
 
 def create_main_window():
     """메인 윈도우와 필요한 컴포넌트들을 생성합니다."""
-    # # 핵심 컴포넌트 초기화
-    # image_processor = ImageProcessor()
-    # roi_manager = ROIManager()
-    
-    # # UI 컴포넌트 생성
-    # image_widget = ImageWidget(image_processor, roi_manager)
-    # log_widget = LogWidget(roi_manager)
+
     image_widget = ImageWidget()
     log_widget = LogWidget()
     

@@ -107,7 +107,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("AstroMapper")
         
         # 최소 크기 설정
-        self.setMinimumSize(1500, 1100)
+        self.setMinimumSize(1000, 800)
         
         # 윈도우 상태 저장
         self.save_window_state()
@@ -195,7 +195,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         settings.add_recent_project(project_dir)
 
         # 윈도우/스플리터 크기 복원
-        settings_dict = self.project_config.get_settings("window_size")
+        settings_dict = self.project_config.get_window_size()
         window_width = settings_dict.get("window_width", 1500)
         window_height = settings_dict.get("window_height", 1100)
         image_widget_width = settings_dict.get("image_widget_width", 899)

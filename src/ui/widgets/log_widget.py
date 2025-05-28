@@ -33,7 +33,8 @@ class LogWidget(QtWidgets.QWidget):
                 self.message_box_style = f.read()
 
         try:
-            with open("res/data/color.json", "r", encoding="utf-8") as f:
+            color_info_path = get_resource_path(os.path.join("res", "data", "color.json"))
+            with open(color_info_path, "r", encoding="utf-8") as f:
                 self.color_dict = json.load(f)
         except Exception:
             self.color_dict = {
@@ -205,7 +206,8 @@ class LogWidget(QtWidgets.QWidget):
         legend_layout.setContentsMargins(0, 0, 0, 0)
         legend_layout.setSpacing(0)
         try:
-            with open("res/data/point_info.json", "r", encoding="utf-8") as f:
+            point_info_path = get_resource_path(os.path.join("res", "data", "point_info.json"))
+            with open(point_info_path, "r", encoding="utf-8") as f:
                 point_info = json.load(f)["point_info"]
         except Exception:
             point_info = ["checkbox", "#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]

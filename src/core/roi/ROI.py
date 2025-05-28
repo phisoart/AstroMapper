@@ -2,7 +2,7 @@ from PySide6 import QtCore, QtGui
 
 from dataclasses import dataclass, field
 import json, os
-from utils import helper
+from utils import get_resource_path
 
 @dataclass
 class ROI:
@@ -27,13 +27,13 @@ class ROIs(QtCore.QObject):  # QObject 상속
         
         # well_positions 로드
         try:
-            with open("res/data/well_info.json", "r", encoding="utf-8") as f:
+            well_info_path = get_resource_path(os.path.join("res", "data", "well_info.json"))
+            with open(well_info_path, "r", encoding="utf-8") as f:
                 well_data = json.load(f)
                 self.well_positions = well_data.get("96well", [])
         except Exception as e:
             print(f"Well positions 로드 실패: {e}")
             self.well_positions = ["A01", "B01", "C01", "D01", "E01", "F01", "G01", "H01"]  # 기본값
-
     def __len__(self):
         return self.__len
 

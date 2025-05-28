@@ -10,11 +10,17 @@ settings:
   settings_folder: settings
   result_folder: results
 
-window_size:
+window_size_windows:
   window_width: 1500
   window_height: 1100
   image_widget_width: 899
   log_widget_width: 599
+  
+window_size_mac:
+  window_width: 1000
+  window_height: 800
+  image_widget_width: 599
+  log_widget_width: 399
 
 image:
   name: ""
