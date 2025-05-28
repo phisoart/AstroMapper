@@ -21,7 +21,7 @@ class ProjectConfig:
         self.project_path = project_path
         self.config_path = os.path.join(project_path, "settings", "project_config.yaml")
         self.config: Dict = {}
-        
+
         # 설정 파일이 없으면 새로 생성
         if not os.path.exists(self.config_path):
             self._create_default_config()
@@ -30,7 +30,7 @@ class ProjectConfig:
     
     def _create_default_config(self):
         """기본 설정 파일을 생성합니다."""
-        default_config_path = os.path.join(os.path.dirname(__file__), "../config/default_config.yaml")
+        default_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "default_config.yaml"))
         try:
             with open(default_config_path, "r", encoding="utf-8") as f:
                 self.config = yaml.safe_load(f)
@@ -59,7 +59,7 @@ class ProjectConfig:
             with open(self.config_path, 'w', encoding='utf-8') as f:
                 yaml.dump(self.config, f, allow_unicode=True, sort_keys=False)
         except Exception as e:
-            print(f"설정 파일 저장 중 오류 발생: {e}")
+            print(f"config.py설정 파일 저장 중 오류 발생: {e}")
     
     def update_last_modified(self):
         """마지막 수정 시간을 업데이트합니다."""
@@ -117,7 +117,7 @@ class ProjectConfig:
     def get_window_size(self) -> Dict:
         """프로젝트 설정을 반환합니다."""
         # OS별 설정 이름 생성
-        os_specific_name = "window_size" + "_{'mac' if sys.platform == 'darwin' else 'windows'}"
+        os_specific_name = f"window_size_{'mac' if sys.platform == 'darwin' else 'windows'}"
         
         # OS별 설정이 있으면 해당 설정 반환, 없으면 기본 설정 반환
         return self.config.get(os_specific_name, {})
@@ -161,7 +161,7 @@ class ProjectConfig:
             width (int): 윈도우 너비
             height (int): 윈도우 높이
         """
-        os_specific_name = "window_size" +"_{'mac' if sys.platform == 'darwin' else 'windows'}"
+        os_specific_name = f"window_size_{'mac' if sys.platform == 'darwin' else 'windows'}"
 
         self.config.setdefault(os_specific_name, {})
         self.config[os_specific_name]["window_width"] = width
@@ -172,7 +172,7 @@ class ProjectConfig:
         """
         splitter의 각 위젯(이미지, 로그)의 width를 config에 저장합니다.
         """
-        os_specific_name = "window_size" +"_{'mac' if sys.platform == 'darwin' else 'windows'}"
+        os_specific_name = f"window_size_{'mac' if sys.platform == 'darwin' else 'windows'}"
 
         self.config.setdefault(os_specific_name, {})
         self.config[os_specific_name]["image_widget_width"] = image_width

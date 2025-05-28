@@ -54,7 +54,7 @@ class ReferencePointDialog(QtWidgets.QDialog):
         main_layout.addLayout(point2_row)
 
         main_layout.addStretch(1)
-        btn_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        btn_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonㅉBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         btn_box.accepted.connect(self.accept)
         btn_box.rejected.connect(self.reject)
         main_layout.addWidget(btn_box) 
@@ -63,8 +63,9 @@ class ReferencePointDialog(QtWidgets.QDialog):
         self.reference_point_cosmosort_1 = QPointF(self.point1_x_edit.text(), self.point1_y_edit.text())
     def set_reference_point_2(self):
         self.reference_point_cosmosort_2 = QPointF(self.point2_x_edit.text(), self.point2_y_edit.text())
-        
+
     def set_reference_point_image_1(self):
         self.reference_point_image_1 = QPoint(self.point1_x_edit.text(), self.point1_y_edit.text())
+
     def set_reference_point_image_2(self):
         self.reference_point_image_2 = QPoint(self.point2_x_edit.text(), self.point2_y_edit.text())

@@ -1,7 +1,7 @@
 from typing import Optional
 from PySide6 import QtWidgets, QtCore, QtGui
 import os
-
+import sys
 from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, InitView
 from utils.helper import get_resource_path
 from utils.settings import Settings
@@ -106,8 +106,12 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         # 윈도우 제목 설정
         self.setWindowTitle("AstroMapper")
         
-        # 최소 크기 설정
-        self.setMinimumSize(1000, 800)
+        if sys.platform == "darwin":
+            # 최소 크기 설정
+            self.setMinimumSize(1000, 800)
+        else:
+            # 최소 크기 설정
+            self.setMinimumSize(1500, 1100)
         
         # 윈도우 상태 저장
         self.save_window_state()
@@ -253,12 +257,17 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.project_dir = project_dir
         self.image_widget.project_dir = project_dir
 
+        folder_path = os.path.join(project_dir, "settings")
+        os.makedirs(folder_path, exist_ok=True)
+
         self.project_config = ProjectConfig(project_dir)
         self.image_widget.project_config = self.project_config
         self.log_widget.project_config = self.project_config
         # 프로젝트 하위 폴더 생성
         settings = self.project_config.get_settings("settings")
         for folder in settings.values():
+            if folder == "settings":
+                continue
             folder_path = os.path.join(project_dir, folder)
             os.makedirs(folder_path, exist_ok=True)
         

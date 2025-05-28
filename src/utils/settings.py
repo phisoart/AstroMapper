@@ -53,7 +53,7 @@ class Settings:
             with open(settings_path, 'w', encoding='utf-8') as f:
                 json.dump(self._settings, f, indent=4)
         except Exception as e:
-            print(f"설정 파일 저장 중 오류 발생: {e}")
+            print(f"settings.py 설정 파일 저장 중 오류 발생: {e}")
     
     def get(self, key: str, default: Any = None) -> Any:
         """설정값을 가져옵니다."""

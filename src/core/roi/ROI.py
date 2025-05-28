@@ -57,7 +57,16 @@ class ROIs(QtCore.QObject):  # QObject 상속
         if _ROI.note == "":
             _ROI.note = str(self.__len + 1)
         if _ROI.well == "":
-            _ROI.well = self.well_positions[self.__len]
+            if self.__len == 0:
+                _ROI.well = "A01"
+            else:
+                prev_well = self.__ROIs[-1].well
+                if prev_well in self.well_positions:
+                    idx = self.well_positions.index(prev_well)
+                    next_idx = (idx + 1) % len(self.well_positions)
+                    _ROI.well = self.well_positions[next_idx]
+                else:
+                    _ROI.well = "A01"
         self.__ROIs.append(_ROI)
         self.__len += 1
         print(_ROI)
