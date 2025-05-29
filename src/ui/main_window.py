@@ -91,6 +91,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.ROIs = ROIs()
         self.ROIs.rois_changed.connect(self.log_widget.on_rois_changed)
         self.image_widget.tool_bar.sameWellToggled.connect(self.ROIs.set_is_same_well)
+        self.image_widget.tool_bar.roiToggled.connect(self.image_widget.set_tool_bar_roi_on)
         self.image_widget.ROIs = self.ROIs
         self.log_widget.ROIs = self.ROIs
 

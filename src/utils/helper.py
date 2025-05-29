@@ -30,11 +30,11 @@ def open_webpage(url: str) -> None:
 def mousePressEvent(self: 'ImageWidget', event):
     has_image, _ = self.project_config.get_image_settings()
     if event.button() == QtCore.Qt.LeftButton:
-        if has_image and event.modifiers() == QtCore.Qt.ShiftModifier:
+        if has_image and (event.modifiers() == QtCore.Qt.ShiftModifier or self.tool_bar_roi_on):
             self.current_ROI.rect = QtCore.QRect(
                 int(event.pos().x()), int(event.pos().y()), 1, 1
             )
-            self.shift_on = True
+            self.select_roi_on = True
         # elif has_image and event.modifiers() == QtCore.Qt.ControlModifier:
         #     if self.marker_state != -1:
         #         self.marker_center[self.marker_state] = (
@@ -57,8 +57,8 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
     if event.button() == QtCore.Qt.LeftButton:
         has_image, _ = self.project_config.get_image_settings()
         self.dragging = False
-        if has_image and self.shift_on:
-            self.shift_on = False
+        if has_image and self.select_roi_on:
+            self.select_roi_on = False
 
             # 현재 윈도우에서의 window 값
             xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
@@ -94,13 +94,13 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
             self.update_img()
             self.updateLogSignal.emit()
         else:
-            self.shift_on = False
+            self.select_roi_on = False
         event.accept()
 
 
 def mouseMoveEvent(self: 'ImageWidget', event):
     has_image, _ = self.project_config.get_image_settings()
-    if has_image and self.shift_on:
+    if has_image and self.select_roi_on:
         xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
             self.current_ROI.rect.x(), event.pos().x()
         )

@@ -62,11 +62,9 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 # TODO
 # 소팅기능 추가
 
-# TOOL에 네모로 영역추가 넣기
 
 # 디자인 파일 정리하기
 # lOG에 HOVER기능 추가
-
 
 
 # TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.

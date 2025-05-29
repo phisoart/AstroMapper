@@ -8,6 +8,8 @@ class ToolBar(QtWidgets.QToolBar):
     
     crossToggled = QtCore.Signal(bool)
     sameWellToggled = QtCore.Signal(bool)
+    roiToggled = QtCore.Signal(bool)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("toolBar")
@@ -15,6 +17,7 @@ class ToolBar(QtWidgets.QToolBar):
         self.cross_on = False
         self.project_config = None
         self.same_well_on = False
+        self.roi_on = False
         self.init_ui()
     
     def init_ui(self):
@@ -34,11 +37,19 @@ class ToolBar(QtWidgets.QToolBar):
 
         self.addSeparator()
         self.same_well_action = self.addAction("Same Well")
+        self.same_well_action.setCheckable(True)
+        self.same_well_action.setChecked(self.same_well_on)
         self.same_well_action.triggered.connect(self.toggle_same_well)
-        self.same_well_action.setCheckable(self.same_well_on)
+
+        self.addSeparator()
+        self.roi_action = self.addAction("Select ROI")
+        self.roi_action.setCheckable(True)
+        self.roi_action.setChecked(self.roi_on)
+        self.roi_action.triggered.connect(self.toggle_roi)
 
     def toggle_same_well(self):
         self.same_well_on = not self.same_well_on
+        self.same_well_action.setChecked(self.same_well_on)
         self.sameWellToggled.emit(self.same_well_on)
 
     def toggle_cross(self):
@@ -129,4 +140,7 @@ class ToolBar(QtWidgets.QToolBar):
             if hasattr(self.project_config, "set_color_name"):
                 self.project_config.set_color_name(color_name)
 
-    
+    def toggle_roi(self):
+        self.roi_on = not self.roi_on
+        self.roi_action.setChecked(self.roi_on)
+        self.roiToggled.emit(self.roi_on)

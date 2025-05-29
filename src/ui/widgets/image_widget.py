@@ -21,11 +21,12 @@ class ImageWidget(QtWidgets.QWidget):
         self.sub_img = None
         self.is_svs = False
         self.dragging = False
-        self.shift_on = False
+        self.select_roi_on = False
         self.drawing_rect = QtCore.QRect()
         self.init_window_ratio = None
         self.project_config = None
         self.ROIs = ROIs()
+        self.tool_bar_roi_on = False
 
         self.is_square = True
 
@@ -265,7 +266,7 @@ class ImageWidget(QtWidgets.QWidget):
 
         if self.is_sub_img:
             self.update_sub_img(painter, crop_rect, self.sub_img_scale)
-        if self.shift_on:
+        if self.select_roi_on:
             color_hex = self.project_config.get_color()
             pen = QtGui.QPen(QtGui.QColor(color_hex), 1)
             painter.setPen(pen)
@@ -431,3 +432,6 @@ class ImageWidget(QtWidgets.QWidget):
     def move_image(self, x, y):
         self.tmp_center = QtCore.QPointF(x, y)
         self.update_img()
+
+    def set_tool_bar_roi_on(self, on: bool):
+        self.tool_bar_roi_on = on
