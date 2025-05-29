@@ -51,7 +51,6 @@ class ProjectConfig:
                 self.config = yaml.safe_load(f)
         except Exception as e:
             print(f"설정 파일 로드 중 오류 발생: {e}")
-            self._create_default_config()
     
     def save_config(self):
         """설정을 파일에 저장합니다."""

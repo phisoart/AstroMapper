@@ -2,6 +2,8 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from utils.helper import get_resource_path
 import os
 import json
+# from ui import AstromapperMainWindow, ImageWidget
+from ui.widgets.log_widget import LogWidget, LogRowWidget, ClickableLabel
 
 class ToolBar(QtWidgets.QToolBar):
     """메인 툴바 위젯입니다."""

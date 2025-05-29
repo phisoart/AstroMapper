@@ -94,3 +94,13 @@ class ROIs(QtCore.QObject):  # QObject 상속
     def set_is_same_well(self, is_same_well):
         print(f"set_is_same_well: {is_same_well}")
         self.is_same_well = is_same_well
+
+    def sort(self, key_func, reverse=False):
+        """
+        key_func: ROI 객체를 받아 정렬 기준 값을 반환하는 함수
+        reverse: True면 내림차순, False면 오름차순
+        내부 __ROIs 리스트를 직접 정렬하고, 정렬된 리스트를 반환
+        """
+        self.__ROIs.sort(key=key_func, reverse=reverse)
+        self.rois_changed.emit()
+        return self.__ROIs

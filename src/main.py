@@ -15,9 +15,7 @@ def setup_application():
     style_path = get_resource_path(os.path.join("src", "ui", "styles.qss"))
     with open(style_path, "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())
-    
-    QResource.registerResource("ui/resources.qrc")
-    
+        
     return app
 
 def create_main_window():
@@ -60,12 +58,9 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 #     log_widget.extract_signal.connect(image_widget.extract_cosmosort_protocol)
 
 # TODO
-# 소팅기능 추가
-
 
 # 디자인 파일 정리하기
 # lOG에 HOVER기능 추가
-
 
 # TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
 
@@ -75,7 +70,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
 # 6. ROIs들 이미지 출력하는 기능 추가
 
 # 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
-
 
 # 레퍼런스 등록되면 실제 길이와 변환 가능하도록.
 # 6. svs 이미지 대응 -> svs로드해서 이미지로 받으면 추후 프로세스 동일!
@@ -96,8 +90,7 @@ def main():
     #     level=logging.INFO,
     #     format='[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
     # )
-    # config = Config()
-    # # 애플리케이션 설정
+
     app = setup_application()
     
     # 메인 윈도우 생성

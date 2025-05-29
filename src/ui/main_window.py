@@ -2,6 +2,7 @@ from typing import Optional
 from PySide6 import QtWidgets, QtCore, QtGui
 import os
 import sys
+import yaml
 from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, InitView
 from utils.helper import get_resource_path
 from utils.settings import Settings
@@ -182,6 +183,24 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             msg_box.setText("No project exists. Please create a new project.")
             msg_box.setStyleSheet(self.message_box_style)
             # 모든 자식 위젯에 스타일 강제 적용
+            for child in msg_box.findChildren(QtWidgets.QWidget):
+                child.setStyleSheet(self.message_box_style)
+            msg_box.exec()
+            return
+
+        # 버전 체크: default_config.yaml과 다르면 에러
+        default_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "default_config.yaml"))
+        with open(default_config_path, 'r', encoding='utf-8') as f:
+            default_config = yaml.safe_load(f)
+        default_version = default_config.get('project', {}).get('version')
+        with open(config_path, 'r', encoding='utf-8') as f:
+            loaded_config = yaml.safe_load(f)
+        current_version = loaded_config.get('project', {}).get('version')
+        if current_version != default_version:
+            msg_box = QtWidgets.QMessageBox(self)
+            msg_box.setWindowTitle("Error")
+            msg_box.setText(f"Project version mismatch!\nCurrent: {current_version} / Required: {default_version}\nPlease create a new project.")
+            msg_box.setStyleSheet(self.message_box_style)
             for child in msg_box.findChildren(QtWidgets.QWidget):
                 child.setStyleSheet(self.message_box_style)
             msg_box.exec()

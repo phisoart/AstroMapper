@@ -4,6 +4,7 @@ import os
 import json
 from core.roi.ROI import ROIs, ROI  # ROI 클래스도 import
 from ui.dialogs.settings_dialog import SettingsDialog
+from .clickable_label import ClickableLabel
 from .log_row_widget import LogRowWidget
 from ui.dialogs.reference_point_dialog import ReferencePointDialog
 
@@ -29,6 +30,8 @@ class LogWidget(QtWidgets.QWidget):
         self.legend_widgets = []
         self.log_rows = []
         self.selected_rows = []
+        self.sort_states = {}  # {col_idx: True(asc)/False(desc)}
+        self.sort_col = None
         style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
         if os.path.exists(style_path):
             with open(style_path, "r", encoding="utf-8") as f:
@@ -213,8 +216,7 @@ class LogWidget(QtWidgets.QWidget):
                 point_info = json.load(f)["point_info"]
         except Exception:
             point_info = ["checkbox", "#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
-        # 오른쪽에 더미 성분 추가
-        point_info = point_info
+
         # Width, Height 이름 변경
         legend_labels = []
         for x in point_info:
@@ -225,7 +227,6 @@ class LogWidget(QtWidgets.QWidget):
             else:
                 legend_labels.append(x)
         self.column_count = len(legend_labels)
-
         self.legend_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         self.legend_splitter.setStyleSheet("""
             QSplitter {
@@ -238,62 +239,40 @@ class LogWidget(QtWidgets.QWidget):
                 margin: 0px !important;
             }
         """)
-        for label in legend_labels:
-            if label == "checkbox":
-                l = QtWidgets.QLabel()
-                l.setFixedWidth(20)
-                l.setStyleSheet(
-                "QLabel {"
-                "  color: #aaa !important;"
-                "  font-size: 12px !important;"
-                "  font-weight: normal !important;"
-                "  background: transparent !important;"
-                "  border: none !important;"
-                "  min-height: 22px !important;"
-                "}"
-            )
-            elif label == "Delete":
-                l = QtWidgets.QLabel()
-                l.setFixedWidth(24)
-                l.setStyleSheet(
-                "QLabel {"
-                "  color: #aaa !important;"
-                "  font-size: 12px !important;"
-                "  font-weight: normal !important;"
-                "  background: transparent !important;"
-                "  border: none !important;"
-                "  min-height: 22px !important;"
-                "}"
-            )
-            elif label == "Color":
-                l = QtWidgets.QLabel(label)
-                l.setAlignment(QtCore.Qt.AlignCenter)
-                l.setStyleSheet(
-                "QLabel {"
-                "  color: #aaa !important;"
-                "  font-size: 12px !important;"
-                "  font-weight: normal !important;"
-                "  background: transparent !important;"
-                "  border: none !important;"
-                "  min-width: 115px !important;"
-                "  min-height: 22px !important;"
-                "}"
-            )
+        sortable_indices = [0, 2, 3, 4, 5, 6, 7, 8]  # checkbox, x, y, w, h, well, color, note
+        self.legend_widgets = []
+        for idx, label in enumerate(legend_labels):
+            if idx in sortable_indices:
+                if label == "checkbox" or label == "Delete":
+                    l = ClickableLabel("", idx)
+                else:
+                    l = ClickableLabel(label, idx)
+                l.clicked.connect(self.on_legend_clicked)
             else:
-                l = QtWidgets.QLabel(label)
-                l.setAlignment(QtCore.Qt.AlignCenter)
-                l.setStyleSheet(
+                if label == "checkbox" or label == "Delete":
+                    l = QtWidgets.QLabel("")
+                else:
+                    l = QtWidgets.QLabel(label)
+            
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            l.setStyleSheet(
                 "QLabel {"
                 "  color: #aaa !important;"
                 "  font-size: 12px !important;"
                 "  font-weight: normal !important;"
                 "  background: transparent !important;"
                 "  border: none !important;"
-                "  min-width: 40px !important;"
                 "  min-height: 22px !important;"
                 "}"
             )
-
+            if label == "checkbox":
+                l.setFixedWidth(20)
+            elif label == "Delete":
+                l.setFixedWidth(24)
+            elif label == "Color":
+                l.setMinimumWidth(115)
+            else:
+                l.setMinimumWidth(40)
             self.legend_splitter.addWidget(l)
             self.legend_widgets.append(l)
         # splitter handle 비활성화(숨김) - 첫 번째, 마지막 한 구간
@@ -366,7 +345,6 @@ class LogWidget(QtWidgets.QWidget):
             widths = self.project_config.get_log_widget_widths()
             if widths:
                 self.legend_splitter.setSizes(widths)
-                sizes = self.legend_splitter.sizes()
                 for row in getattr(self, 'log_rows', []):
                     row.splitter.setSizes(widths)
 
@@ -757,5 +735,45 @@ class LogWidget(QtWidgets.QWidget):
         # TODO: 실제 이미지 이동 함수와 연결
         print(f"Move image center to: ({x}, {y})")
         self.moveImageSignal.emit(x, y)
+
+    def on_legend_clicked(self, col_idx):
+        # 정렬 방향 토글
+        prev_state = self.sort_states.get(col_idx, False)
+        self.sort_states[col_idx] = not prev_state
+        self.sort_col = col_idx
+        self.sort_and_update_rows()
+        self.update_legend_sort_indicator()
+
+    def sort_and_update_rows(self):
+        # 정렬 기준 매핑: idx -> ROI 속성
+        idx_to_attr = {
+            0: lambda roi: roi.checked,  # checkbox
+            2: lambda roi: roi.x,
+            3: lambda roi: roi.y,
+            4: lambda roi: roi.width,
+            5: lambda roi: roi.height,
+            6: lambda roi: roi.well,
+            7: lambda roi: roi.color_name,
+            8: lambda roi: roi.note,
+        }
+        if self.sort_col not in idx_to_attr:
+            return
+        reverse = not self.sort_states[self.sort_col]
+        # ROIs 내부 리스트를 직접 정렬하고, 그 결과를 받아 row 재생성
+        self.ROIs.sort(key_func=idx_to_attr[self.sort_col], reverse=reverse)
+        self.update_log_entries()
+        # splitter width 동기화
+        self.sync_row_splitters(0, 0)
+
+    def update_legend_sort_indicator(self):
+        # 정렬 방향 표시(▲/▼)
+        for idx, label in enumerate(self.legend_widgets):
+            if isinstance(label, ClickableLabel):
+                base_text = label.text().replace(" ▲", "").replace(" ▼", "")
+                if idx == self.sort_col:
+                    arrow = " ▲" if self.sort_states.get(idx, True) else " ▼"
+                    label.setText(base_text + arrow)
+                else:
+                    label.setText(base_text)
 
     

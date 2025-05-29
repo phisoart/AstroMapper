@@ -3,6 +3,7 @@ project:
   created_date: ""
   last_modified: ""
   path: ""
+  version: "0.1"
 
 settings:
   image_folder: images
