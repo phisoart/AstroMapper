@@ -1,17 +1,5 @@
-/* 타이틀바 스타일 */
-QWidget#titleBar {
-    background-color: #1E1E1E;
-    border-bottom: 1px solid #707070;
-    min-height: 30px;
-    max-height: 30px;
-    margin: 0px;
-    padding: 0px;
-}
-
 QMenuBar {
-    background-color: transparent;
-    border: none;
-    color: #C0C0C0;
+    background-color:rgb(0, 0, 0);
 }
 
 QMenuBar::item {
@@ -38,7 +26,7 @@ QMenu {
 
 QMenu::item {
     padding: 5px 20px;
-    color: #C0C0C0;
+    color:rgb(228, 228, 228);
 }
 
 QMenu::item:selected {
@@ -51,9 +39,10 @@ QMenu::item:pressed {
 
 QMenu::separator {
     height: 1px;
-    background-color: #3D3D3D;
+    background-color:rgb(228, 228, 228);
     margin: 5px 0px;
 }
+
 
 /* 기본 버튼 스타일 */
 QPushButton {

@@ -15,49 +15,49 @@ QTextEdit {
     selection-color: #FFFFFF;
 }
 
-/* 스크롤바 스타일 */
-QScrollBar:vertical {
+/* 스크롤바: 현대적 다크 테마 스타일 */
+QScrollBar:vertical, QScrollBar:horizontal {
+    background: transparent;
     border: none;
-    background-color: #2D2D2D;
-    width: 10px;
     margin: 0px;
 }
 
-QScrollBar::handle:vertical {
-    background-color: #4D4D4D;
-    border-radius: 5px;
-    min-height: 20px;
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #ffb347, stop:1 #ff7f50
+    );
+    border-radius: 7px;
+    min-height: 30px;
+    min-width: 30px;
+    border: 2px solid #23272f;
+    /* box-shadow는 Qt 6.5+에서만 지원, 미지원 Qt에서는 무시됨 */
+    /* box-shadow: 0 2px 8px rgba(0,0,0,0.15); */
+    transition: background 0.2s;
 }
 
-QScrollBar::handle:vertical:hover {
-    background-color: #5D5D5D;
+QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:1,
+        stop:0 #ffd580, stop:1 #ffb347
+    );
 }
 
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical {
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical,
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: transparent;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    background: none;
+    border: none;
+    width: 0px;
     height: 0px;
 }
 
-QScrollBar:horizontal {
-    border: none;
-    background-color: #2D2D2D;
-    height: 10px;
-    margin: 0px;
-}
-
-QScrollBar::handle:horizontal {
-    background-color: #4D4D4D;
-    border-radius: 5px;
-    min-width: 20px;
-}
-
-QScrollBar::handle:horizontal:hover {
-    background-color: #5D5D5D;
-}
-
-QScrollBar::add-line:horizontal,
-QScrollBar::sub-line:horizontal {
-    width: 0px;
+QScrollBar:corner {
+    background: transparent;
 }
 
 /* 버튼 스타일 */

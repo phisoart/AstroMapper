@@ -11,11 +11,12 @@ class ImageWidget(QtWidgets.QWidget):
     updateLogSignal = QtCore.Signal()
     connectSignal = QtCore.Signal(bool)
 
-    def __init__(self):
+    def __init__(self, ROIs):
         super().__init__()
         self.setObjectName("imageWidget")
 
         # 여기 있는 것들 로드 되도록.
+        self.ROIs = ROIs
         self.project_dir = None
         self.origin_img = None
         self.sub_img = None
@@ -25,7 +26,6 @@ class ImageWidget(QtWidgets.QWidget):
         self.drawing_rect = QtCore.QRect()
         self.init_window_ratio = None
         self.project_config = None
-        self.ROIs = ROIs()
         self.tool_bar_roi_on = False
 
         self.is_square = True

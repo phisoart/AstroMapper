@@ -6,12 +6,11 @@ from PySide6.QtCore import QResource
 import logging
 import os
 import traceback
-
+from core.roi.ROI import ROIs
 def setup_application():
     """애플리케이션의 기본 설정을 초기화합니다."""
     app = QtWidgets.QApplication(sys.argv)
-    
-    # 스타일시트 로드 (기본 스타일)
+
     style_path = get_resource_path(os.path.join("src", "ui", "styles.qss"))
     with open(style_path, "r", encoding="utf-8") as f:
         app.setStyleSheet(f.read())
@@ -20,24 +19,19 @@ def setup_application():
 
 def create_main_window():
     """메인 윈도우와 필요한 컴포넌트들을 생성합니다."""
-
-    image_widget = ImageWidget()
-    log_widget = LogWidget()
     
-    # 메인 윈도우 생성
-    # window = AstromapperMainWindow()
-    window = AstromapperMainWindow(image_widget, log_widget)
+    window = AstromapperMainWindow()
 
-    
-    # # 시그널 연결
-    connect_signals(image_widget, log_widget)
+    connect_signals(window.image_widget, window.log_widget, window.ROIs)
     
     return window
 
-def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
+def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs):
 #     """컴포넌트 간 시그널을 연결합니다."""
 #     # 이미지 위젯 -> 로그 위젯 시그널
     image_widget.openImgSignal.connect(log_widget.openImgSignal)
+    image_widget.tool_bar.sameWellToggled.connect(ROIs.set_is_same_well)
+    image_widget.tool_bar.roiToggled.connect(image_widget.set_tool_bar_roi_on)
 #     image_widget.update_log_signal.connect(log_widget.update_log_entries)
 #     image_widget.set_image_signal.connect(log_widget.set_image_name)
 #     image_widget.connect_signal.connect(log_widget.replace_log_buttons_layout)
@@ -50,6 +44,9 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget):
     log_widget.removeROISignal.connect(image_widget.remove_roi_layer)
     log_widget.clearROISignal.connect(image_widget.clear_roi_layer)
     log_widget.moveImageSignal.connect(image_widget.move_image)
+
+    ROIs.rois_changed.connect(log_widget.on_rois_changed)
+
 #     log_widget.image_upload_requested.connect(image_widget.open_image)
 #     log_widget.sub_image_check.connect(image_widget.on_checkbox_state_changed)
 #     log_widget.slider_changed.connect(image_widge t.on_slider_value_changed)

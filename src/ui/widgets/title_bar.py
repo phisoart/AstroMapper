@@ -3,13 +3,11 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from utils.helper import get_resource_path, open_webpage
 from ui.dialogs.license_dialog import LicenseDialog
 
-class TitleBar(QtWidgets.QWidget):
+class TitleBar(QtWidgets.QMenuBar):
     """커스텀 타이틀바 위젯입니다."""
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setObjectName("titleBar")
-        print(self.window().size())
         self.setFixedHeight(30)
         self.load_styles()
         self.init_ui()

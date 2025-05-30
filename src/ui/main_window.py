@@ -14,8 +14,6 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
     
     def __init__(
         self,
-        image_widget: ImageWidget = None,
-        log_widget: LogWidget = None,
         parent: Optional[QtWidgets.QWidget] = None
     ):
         """
@@ -29,26 +27,33 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         super().__init__(parent, QtCore.Qt.FramelessWindowHint)
         
         self.project_dir = None
+        self.ROIs = ROIs()
 
-        self.image_widget = image_widget if image_widget else ImageWidget()
-        self.log_widget = log_widget if log_widget else LogWidget()
+        self.image_widget = ImageWidget(self.ROIs)
+        self.log_widget = LogWidget(self.ROIs)
 
         self.init_ui()
+
         self.setup_window_properties()
         self.load_styles()
     
     def init_ui(self):
         """UI 컴포넌트들을 초기화하고 레이아웃을 설정합니다."""
+
+        self.title_bar = TitleBar(self)
+        self.setMenuBar(self.title_bar)
+        self.status_bar = StatusBar(self)
+        self.setStatusBar(self.status_bar)
+        
+        self.main_widget = self.create_main_widget()
+        self.setCentralWidget(self.main_widget)
+    
+    def create_main_widget(self):
         main_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout(main_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 타이틀바 추가
-        self.title_bar = TitleBar(self)
-        main_layout.addWidget(self.title_bar)
-        
-
         # 중앙 위젯 영역 (윈도우 크기에 맞게 확장)
         self.central_widget = QtWidgets.QWidget()
         self.central_layout = QtWidgets.QVBoxLayout(self.central_widget)
@@ -73,7 +78,6 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.log_widget)
         self.splitter.setSizes([600, 400])  # 초기 크기 설정
 
-
         self.splitter.hide()
         
         # 스타일시트 다시 로드
@@ -82,21 +86,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         
         self.central_layout.addWidget(self.splitter)
         main_layout.addWidget(self.central_widget)
-        
-        # 상태바 추가
-        self.status_bar = StatusBar(self)
-        main_layout.addWidget(self.status_bar)
-        
-        self.setCentralWidget(main_widget)
+        return main_widget
 
-        self.ROIs = ROIs()
-        self.ROIs.rois_changed.connect(self.log_widget.on_rois_changed)
-        self.image_widget.tool_bar.sameWellToggled.connect(self.ROIs.set_is_same_well)
-        self.image_widget.tool_bar.roiToggled.connect(self.image_widget.set_tool_bar_roi_on)
-        self.image_widget.ROIs = self.ROIs
-        self.log_widget.ROIs = self.ROIs
-
-    
     def load_styles(self):
         """QSS 스타일시트를 로드합니다."""
         style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
@@ -124,16 +115,6 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         settings = QtCore.QSettings("AstroMapper", "MainWindow")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
-    
-    def restore_window_state(self):
-        """저장된 윈도우 상태를 복원합니다."""
-        settings = QtCore.QSettings("AstroMapper", "MainWindow")
-        geometry = settings.value("geometry")
-        if geometry:
-            self.restoreGeometry(geometry)
-        state = settings.value("windowState")
-        if state:
-            self.restoreState(state)
     
     def closeEvent(self, event: QtGui.QCloseEvent):
         """

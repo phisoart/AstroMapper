@@ -22,9 +22,9 @@ class LogWidget(QtWidgets.QWidget):
     # updateLogSignal = QtCore.Signal()
     # connectSignal = QtCore.Signal(bool)
 
-    def __init__(self):
+    def __init__(self, ROIs):
         super().__init__()
-        self.ROIs = ROIs()        
+        self.ROIs = ROIs      
         
         self.project_config = None
         self.legend_widgets = []
