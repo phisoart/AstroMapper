@@ -3,11 +3,12 @@ from PySide6 import QtWidgets, QtCore, QtGui
 import os
 import sys
 import yaml
-from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, InitView
+from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, InitWidget
 from utils.helper import get_resource_path
 from utils.settings import Settings
 from utils.config import ProjectConfig
 from core.roi import ROIs
+import logging
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
     """AstroMapper 애플리케이션의 메인 윈도우 클래스입니다."""
@@ -25,17 +26,25 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             parent: 부모 위젯
         """
         super().__init__(parent, QtCore.Qt.FramelessWindowHint)
-        
+        logging.info("Hi")
+        self.is_init_view = True
+        self.is_saved = True
+        self.is_project = False
+
         self.project_dir = None
         self.ROIs = ROIs()
 
         self.image_widget = ImageWidget(self.ROIs)
         self.log_widget = LogWidget(self.ROIs)
+        # 위젯 추가
+        self.image_widget.setMinimumWidth(400)  # 최소 너비 설정
+        self.log_widget.setMinimumWidth(280)  # 최소 너비 설정
 
         self.init_ui()
 
         self.setup_window_properties()
-        self.load_styles()
+        # self.load_styles()
+
     
     def init_ui(self):
         """UI 컴포넌트들을 초기화하고 레이아웃을 설정합니다."""
@@ -45,7 +54,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.status_bar = StatusBar(self)
         self.setStatusBar(self.status_bar)
         
-        self.main_widget = self.create_main_widget()
+        self.main_widget, self.main_layout = self.create_main_widget()
         self.setCentralWidget(self.main_widget)
     
     def create_main_widget(self):
@@ -54,39 +63,38 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 중앙 위젯 영역 (윈도우 크기에 맞게 확장)
-        self.central_widget = QtWidgets.QWidget()
-        self.central_layout = QtWidgets.QVBoxLayout(self.central_widget)
-        self.central_layout.setContentsMargins(0, 0, 0, 0)
-        self.central_layout.setSpacing(0)
+        init_widget = self.create_init_widget()
+        main_layout.addWidget(init_widget, alignment=QtCore.Qt.AlignCenter)
         
-        # InitView(400x400)를 중앙에 고정
-        self.init_view = InitView(main_window=self)
-        self.init_view.create_btn.clicked.connect(self.create_project)
-        self.init_view.open_btn.clicked.connect(self.open_project)
-        self.central_layout.addWidget(self.init_view, alignment=QtCore.Qt.AlignCenter)
-        
-        # 분할 위젯 생성 (초기에는 숨김)
-        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
-        self.splitter.setChildrenCollapsible(False)  # 자식 위젯이 완전히 접히지 않도록 설정
-        self.splitter.setHandleWidth(2)  # 핸들 너비 설정
-        
-        # 위젯 추가
-        self.image_widget.setMinimumWidth(400)  # 최소 너비 설정
-        self.log_widget.setMinimumWidth(280)  # 최소 너비 설정
-        self.splitter.addWidget(self.image_widget)
-        self.splitter.addWidget(self.log_widget)
-        self.splitter.setSizes([600, 400])  # 초기 크기 설정
+        return main_widget, main_layout
 
-        self.splitter.hide()
-        
-        # 스타일시트 다시 로드
-        self.image_widget.load_styles()
-        self.log_widget.load_styles()
-        
-        self.central_layout.addWidget(self.splitter)
-        main_layout.addWidget(self.central_widget)
-        return main_widget
+    def create_init_widget(self):
+        init_widget = InitWidget(main_window=self)
+        init_widget.create_btn.clicked.connect(self.create_project)
+        init_widget.open_btn.clicked.connect(self.open_project)
+        return init_widget
+
+    def create_project_view_widget(self):
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)  # 자식 위젯이 완전히 접히지 않도록 설정
+        splitter.setHandleWidth(2)  # 핸들 너비 설정
+        # 위젯 추가
+        splitter.addWidget(self.image_widget)
+        splitter.addWidget(self.log_widget)
+        return splitter
+
+    def show_project_view_widget(self):
+        # 1. main_layout에서 모든 위젯 제거
+        while self.main_layout.count():
+            item = self.main_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()
+
+        self.is_init_view = False
+        self.project_view_widget = self.create_project_view_widget()
+        self.main_layout.addWidget(self.project_view_widget)
 
     def load_styles(self):
         """QSS 스타일시트를 로드합니다."""
@@ -129,8 +137,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             size = self.size()
             self.project_config.set_window_size(size.width(), size.height())
             # splitter 각 위젯 width 저장
-            if hasattr(self, 'splitter'):
-                sizes = self.splitter.sizes()
+            if hasattr(self, 'project_view_widget'):
+                sizes = self.project_view_widget.sizes()
                 if len(sizes) >= 2:
                     self.project_config.set_splitter_widths(sizes[0], sizes[1])
             self.project_config.update_last_modified()
@@ -207,24 +215,19 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         image_widget_width = settings_dict.get("image_widget_width", 899)
         log_widget_width = settings_dict.get("log_widget_width", 599)
         self.resize(window_width, window_height)
-        self.splitter.setSizes([image_widget_width, log_widget_width])
+        # InitView 제거 및 분할 위젯 표시
+        self.show_project_view_widget()
+        self.project_view_widget.setSizes([image_widget_width, log_widget_width])
 
-        # InitView 제거
-        self.init_view.deleteLater()
-        
-        # 분할 위젯 표시
-        self.splitter.show()
-        
+
         # 상태바에 프로젝트 경로 표시 (30자 초과시 앞부분을 ...으로 표시)
         display_path = project_dir
         if len(project_dir) > 30:
             display_path = "..." + project_dir[-30:]
         self.status_bar.showLeftMessage(f"Project: {display_path}")
-
         _has_img, _img_settings = self.project_config.get_image_settings()
         if _has_img:
             self.image_widget.load_image(_img_settings["path"])
-
         self.log_widget.update_log_frame()
 
     def create_project(self):
@@ -277,17 +280,12 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         settings = Settings()
         settings.add_recent_project(project_dir)
         
-        # InitView 제거
-        self.init_view.deleteLater()
-        
-        # 분할 위젯 표시
-        self.splitter.show()
-        
+        # InitView 제거 및 분할 위젯 표시
+        self.show_project_view()
         # 상태바에 프로젝트 정보 표시
         project_info = self.project_config.get_settings("project")
         display_path = project_info["path"]
         if len(display_path) > 30:
             display_path = "..." + display_path[-30:]
         self.status_bar.showLeftMessage(f"Project: {display_path}")
-
         self.log_widget.update_log_frame()

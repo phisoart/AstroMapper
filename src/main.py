@@ -7,6 +7,8 @@ import logging
 import os
 import traceback
 from core.roi.ROI import ROIs
+import platform
+
 def setup_application():
     """애플리케이션의 기본 설정을 초기화합니다."""
     app = QtWidgets.QApplication(sys.argv)
@@ -16,6 +18,23 @@ def setup_application():
         app.setStyleSheet(f.read())
         
     return app
+
+def setup_logging():
+    formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
+
+    file_handler = logging.FileHandler('log.txt', encoding='utf-8')
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.handlers = []
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
 def create_main_window():
     """메인 윈도우와 필요한 컴포넌트들을 생성합니다."""
@@ -79,28 +98,32 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 # 11. 셀소터 및 이미지 분석 기능 추가.
 # Control Z 기능 추가 (10번까지)
 
+# 1. setting도 yaml로 바꿀것
+# 2. setting - 프로그램에 대한것 프로그램에 저장.
+# 3. config - 프로젝트에 대한것 프로젝트에 저장.
+# 4. 로그 저장
+# 5. 최종 폴더 image, result만 저장.
+# 6. setting은 프로그램 안에, config및 로그는 프로젝트 폴더 안에 바로. 임사파일은 .붙여서 관리하고 꺼질 때 삭제.
+
 def main():
     """애플리케이션의 메인 진입점입니다."""
-    # # 설정 로드
-    # logging.basicConfig(
-    #     filename='log.txt',
-    #     level=logging.INFO,
-    #     format='[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
-    # )
+
+    setup_logging()
 
     app = setup_application()
-    
-    # 메인 윈도우 생성
     window = create_main_window()
     
-    # # 윈도우 아이콘 설정
-    icon_path = get_resource_path(os.path.join("res", "images", "Astromapper.ico"))
+    # TODO: 아이콘 업데이트
+    if platform.system() == "Darwin":  # macOS
+        icon_path = get_resource_path(os.path.join("res", "images", "Astromapper.icns"))
+    else:
+        icon_path = get_resource_path(os.path.join("res", "images", "Astromapper.ico"))
+
     window.setWindowIcon(QtGui.QIcon(icon_path))
     
     # # 윈도우 표시
     window.show()
     
-    # # 애플리케이션 실행
     sys.exit(app.exec())
 
 if __name__ == "__main__":

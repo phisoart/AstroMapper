@@ -1,0 +1,32 @@
+[2025-06-02 16:14:52,352][main.py:97][INFO] Created AstromapperMainWindow
+[2025-06-02 16:14:52,353][main.py:99][WARNING] 경고 메시지
+[2025-06-02 16:14:52,353][main.py:100][ERROR] 에러 메시지
+[2025-06-02 16:14:52,353][main.py:101][CRITICAL] 치명적 에러 메시지
+[2025-06-02 16:15:14,002][main.py:97][INFO] Created AstromapperMainWindow
+[2025-06-02 16:15:14,002][main.py:99][WARNING] warning
+[2025-06-02 16:15:14,002][main.py:100][ERROR] error
+[2025-06-02 16:15:14,003][main.py:101][CRITICAL] critical
+[2025-06-02 16:16:30,331][main.py:108][INFO] Created AstromapperMainWindow
+[2025-06-02 16:16:30,332][main.py:110][WARNING] warning
+[2025-06-02 16:16:30,332][main.py:111][ERROR] error
+[2025-06-02 16:16:30,333][main.py:112][CRITICAL] critical
+[2025-06-02 16:17:41,107][main.py:108][INFO] Created AstromapperMainWindow
+[2025-06-02 16:17:41,108][main.py:110][WARNING] warning
+[2025-06-02 16:17:41,108][main.py:111][ERROR] error
+[2025-06-02 16:17:41,109][main.py:112][CRITICAL] critical
+[2025-06-02 16:17:41,166][main_window.py:29][INFO] Hi
+[2025-06-02 16:25:51,370][main_window.py:29][INFO] Hi
+[2025-06-02 16:26:02,458][main_window.py:29][INFO] Hi
+[2025-06-02 16:28:08,073][main_window.py:29][INFO] Hi
+[2025-06-02 16:30:33,147][main_window.py:29][INFO] Hi
+[2025-06-02 16:30:49,951][main_window.py:29][INFO] Hi
+[2025-06-02 16:31:40,874][main_window.py:29][INFO] Hi
+[2025-06-02 16:32:37,149][main_window.py:29][INFO] Hi
+[2025-06-02 16:33:35,273][main_window.py:29][INFO] Hi
+[2025-06-02 16:34:11,420][main_window.py:29][INFO] Hi
+[2025-06-02 16:38:24,415][main_window.py:29][INFO] Hi
+[2025-06-02 16:44:51,040][main_window.py:29][INFO] Hi
+[2025-06-02 16:49:55,653][main_window.py:29][INFO] Hi
+[2025-06-02 16:53:23,064][main_window.py:29][INFO] Hi
+[2025-06-02 16:54:17,936][main_window.py:29][INFO] Hi
+[2025-06-02 16:55:14,523][main_window.py:29][INFO] Hi

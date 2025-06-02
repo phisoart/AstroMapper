@@ -4,6 +4,28 @@ QMainWindow {
     border: 2px solid #4b4b4b;
 }
 
+/* QMenuBar, QMenu */
+QMenuBar {
+    background: #23272e;
+    color: #fff;
+}
+QMenuBar::item {
+    background: transparent;
+    color: #fff;
+    padding: 4px 12px;
+}
+QMenuBar::item:selected {
+    background: #7a7aff;
+}
+QMenu {
+    background: #23272e;
+    color: #fff;
+    border: 1px solid #5a5a5a;
+}
+QMenu::item:selected {
+    background: #7a7aff;
+}
+
 /* QLabel */
 QLabel {
     color: #e0e0e0;
@@ -210,28 +232,6 @@ QFrame {
 QSplitter::handle {
     background: #7a7aff;
     width: 4px;
-}
-
-/* QMenuBar, QMenu */
-QMenuBar {
-    background: #23272e;
-    color: #fff;
-}
-QMenuBar::item {
-    background: transparent;
-    color: #fff;
-    padding: 4px 12px;
-}
-QMenuBar::item:selected {
-    background: #7a7aff;
-}
-QMenu {
-    background: #23272e;
-    color: #fff;
-    border: 1px solid #5a5a5a;
-}
-QMenu::item:selected {
-    background: #7a7aff;
 }
 
 /* QToolBar, QToolButton */
