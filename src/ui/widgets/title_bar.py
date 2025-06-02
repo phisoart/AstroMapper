@@ -4,6 +4,7 @@ from utils.helper import get_resource_path, open_webpage
 from ui.dialogs.license_dialog import LicenseDialog
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
+import logging
 
 class TitleBar(QtWidgets.QMenuBar):
     """커스텀 타이틀바 위젯입니다."""
@@ -220,7 +221,10 @@ class TitleBar(QtWidgets.QMenuBar):
 
     def show_license_dialog(self):
         """라이선스 다이얼로그를 표시합니다."""
+        logging.info("show_license_dialog")
         dialog = LicenseDialog(self)
+        logging.info("end show_license_dialog")
+
         dialog.exec()
     
     def toggle_maximize(self):

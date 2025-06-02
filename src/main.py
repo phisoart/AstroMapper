@@ -75,6 +75,14 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 
 # TODO
 
+# diaglog 디자인 통일해서 바깥으로 빼기
+# 1. setting도 yaml로 바꿀것
+# 2. setting - 프로그램에 대한것 프로그램에 저장.
+# 3. config - 프로젝트에 대한것 프로젝트에 저장.
+# 4. 로그 저장 프로젝트 안으로 바꾸기
+# 5. 최종 폴더 image, result만 저장.
+# 6. setting은 프로그램 안에, config및 로그는 프로젝트 폴더 안에 바로. 임사파일은 .붙여서 관리하고 꺼질 때 삭제.
+
 # 디자인 파일 정리하기
 # lOG에 HOVER기능 추가
 
@@ -82,7 +90,7 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 
 # 4. 레퍼런스 기능 추가하기 - reference dialog 기능 추가
 
-# save dialog 기능 추가
+# save버튼시 생기는 dialog 기능 추가
 # 6. ROIs들 이미지 출력하는 기능 추가
 
 # 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
@@ -97,13 +105,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 # 로그는 프로젝트파일에 저장하도록
 # 11. 셀소터 및 이미지 분석 기능 추가.
 # Control Z 기능 추가 (10번까지)
-
-# 1. setting도 yaml로 바꿀것
-# 2. setting - 프로그램에 대한것 프로그램에 저장.
-# 3. config - 프로젝트에 대한것 프로젝트에 저장.
-# 4. 로그 저장
-# 5. 최종 폴더 image, result만 저장.
-# 6. setting은 프로그램 안에, config및 로그는 프로젝트 폴더 안에 바로. 임사파일은 .붙여서 관리하고 꺼질 때 삭제.
 
 def main():
     """애플리케이션의 메인 진입점입니다."""

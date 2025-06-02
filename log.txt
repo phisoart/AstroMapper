@@ -30,3 +30,63 @@
 [2025-06-02 16:53:23,064][main_window.py:29][INFO] Hi
 [2025-06-02 16:54:17,936][main_window.py:29][INFO] Hi
 [2025-06-02 16:55:14,523][main_window.py:29][INFO] Hi
+[2025-06-02 16:56:04,663][main_window.py:29][INFO] Hi
+[2025-06-02 16:57:05,285][main_window.py:29][INFO] Hi
+[2025-06-02 16:57:20,561][main_window.py:29][INFO] Hi
+[2025-06-02 16:57:22,088][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 16:57:22,089][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 16:57:22,090][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 16:57:22,094][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 16:57:22,094][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 16:57:56,724][main_window.py:29][INFO] Hi
+[2025-06-02 16:57:58,572][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 16:57:58,572][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 16:57:58,573][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 16:57:58,577][license_dialog.py:37][INFO] LicenseDialog load_license_text
+[2025-06-02 16:57:58,579][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 16:57:58,579][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:00:53,305][main_window.py:29][INFO] Hi
+[2025-06-02 17:00:56,055][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:00:56,056][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 17:00:56,057][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 17:00:56,059][license_dialog.py:34][INFO] LicenseDialog addWidget
+[2025-06-02 17:00:56,059][license_dialog.py:38][INFO] LicenseDialog load_license_text
+[2025-06-02 17:00:56,061][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 17:00:56,061][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:01:47,370][main_window.py:29][INFO] Hi
+[2025-06-02 17:01:49,272][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:01:49,273][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 17:01:49,273][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 17:01:49,276][license_dialog.py:34][INFO] LicenseDialog addWidget
+[2025-06-02 17:01:49,277][license_dialog.py:38][INFO] LicenseDialog load_license_text
+[2025-06-02 17:01:49,278][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 17:01:49,278][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:03:00,617][main_window.py:29][INFO] Hi
+[2025-06-02 17:03:02,984][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:03:02,984][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 17:03:02,985][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 17:03:02,987][license_dialog.py:34][INFO] LicenseDialog addWidget
+[2025-06-02 17:03:02,987][license_dialog.py:38][INFO] LicenseDialog load_license_text
+[2025-06-02 17:03:02,989][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 17:03:02,989][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:03:54,989][main_window.py:29][INFO] Hi
+[2025-06-02 17:03:57,403][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:03:57,403][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 17:03:57,404][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 17:03:57,406][license_dialog.py:34][INFO] LicenseDialog addWidget
+[2025-06-02 17:03:57,407][license_dialog.py:38][INFO] LicenseDialog load_license_text
+[2025-06-02 17:03:57,408][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 17:03:57,409][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:04:20,984][main_window.py:29][INFO] Hi
+[2025-06-02 17:04:22,984][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:04:22,985][license_dialog.py:14][INFO] LicenseDialog init
+[2025-06-02 17:04:22,985][license_dialog.py:16][INFO] LicenseDialog load_styles
+[2025-06-02 17:04:22,987][license_dialog.py:34][INFO] LicenseDialog addWidget
+[2025-06-02 17:04:22,988][license_dialog.py:38][INFO] LicenseDialog load_license_text
+[2025-06-02 17:04:22,989][license_dialog.py:18][INFO] LicenseDialog init_ui
+[2025-06-02 17:04:22,989][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:06:44,763][main_window.py:29][INFO] Hi
+[2025-06-02 17:06:46,927][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 17:06:46,927][license_dialog.py:14][INFO] Open LicenseDialog
+[2025-06-02 17:06:46,930][title_bar.py:226][INFO] end show_license_dialog
+[2025-06-02 17:09:52,814][main_window.py:29][INFO] Hi

@@ -33,7 +33,6 @@ QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
     border: 2px solid #23272f;
     /* box-shadow는 Qt 6.5+에서만 지원, 미지원 Qt에서는 무시됨 */
     /* box-shadow: 0 2px 8px rgba(0,0,0,0.15); */
-    transition: background 0.2s;
 }
 
 QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
