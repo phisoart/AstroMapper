@@ -19,7 +19,7 @@ class ProjectConfig:
             project_dir: 프로젝트 루트 디렉토리 경로
         """
         self.project_dir = project_dir
-        self.config_path = os.path.join(project_dir, "settings", "project_config.yaml")
+        self.config_path = os.path.join(project_dir, "project_config.yaml")
         self.config: Dict = {}
 
         # 설정 파일이 없으면 새로 생성
@@ -99,7 +99,7 @@ class ProjectConfig:
         except Exception as e:
             print(f"이미지 정보 저장 중 오류 발생: {e}")
     
-    def get_image_settings(self) -> Tuple[bool, Optional[Dict]]:
+    def get_image_info(self) -> Tuple[bool, Optional[Dict]]:
         """
         이미지 설정을 반환합니다.
         
@@ -108,10 +108,10 @@ class ProjectConfig:
             - 이미지가 존재하면 (True, 이미지 설정)
             - 이미지가 없으면 (False, None)
         """
-        image_settings = self.config.get("image", {})
-        if image_settings.get("name", "") == "":
+        image_info = self.config.get("image", {})
+        if image_info.get("name", "") == "":
             return False, None
-        return True, image_settings
+        return True, image_info
 
     def get_window_size(self) -> Dict:
         """프로젝트 설정을 반환합니다."""
@@ -121,9 +121,9 @@ class ProjectConfig:
         # OS별 설정이 있으면 해당 설정 반환, 없으면 기본 설정 반환
         return self.config.get(os_specific_name, {})
     
-    def get_settings(self, _settings_name: str) -> Dict:
+    def get_config(self, _config_name: str) -> Dict:
         """프로젝트 설정을 반환합니다."""
-        return self.config.get(_settings_name, {})
+        return self.config.get(_config_name, {})
 
     def get_point_info_visible(self) -> list:
         """
@@ -142,7 +142,7 @@ class ProjectConfig:
             point_info = ["checkbox","#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
         
         # project_config의 log_widget 설정에서 visible 상태 가져오기
-        log_widget_settings = self.config.get("log_widget", {})
+        log_widget_config = self.config.get("log_widget", {})
         
         # 각 컬럼의 visible 상태 설정
         visible_list = []
@@ -150,7 +150,7 @@ class ProjectConfig:
             if col == "":  # 빈 문자열인 경우 무조건 True
                 visible_list.append(True)
             else:
-                visible_list.append(log_widget_settings.get(col, True))  # 설정이 없으면 True 
+                visible_list.append(log_widget_config.get(col, True))  # 설정이 없으면 True 
         return visible_list
 
     def set_window_size(self, width: int, height: int):

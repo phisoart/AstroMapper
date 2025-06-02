@@ -1,0 +1,32 @@
+window:
+  width: 1500
+  height: 1100
+  min_width: 1500
+  min_height: 1100
+
+darwin:
+  width: 1000
+  height: 800
+  min_width: 1000
+  min_height: 800
+
+sub_folder:
+  image_folder: image
+  result_folder: result
+
+project:
+  recent_projects: []
+
+status_bar:
+  height: 30
+  max_path_length: 30
+
+image_widget:
+  default_sub_img_size: 1
+  default_is_sub_img: true
+  default_zoom_max_ratio: 100
+  default_zoom_speed: 1.2
+  sub_img_border_color: "#333333"
+  sub_img_border_width: 3
+  sub_img_box_color: "#FFA726"
+  sub_img_box_width: 3

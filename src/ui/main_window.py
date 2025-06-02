@@ -1,14 +1,9 @@
 from typing import Optional
 from PySide6 import QtWidgets, QtCore, QtGui
-import os
-import sys
-import yaml
 from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, InitWidget
-from utils.helper import get_resource_path
-from utils.settings import Settings
-from utils.config import ProjectConfig
 from core.roi import ROIs
-import logging
+from utils.settings import Settings
+from core.project_manager import ProjectManager
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
     
@@ -25,6 +20,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.ROIs = ROIs()
         self.project_config = None
 
+        self.settings = Settings()
+        self.project_manager = ProjectManager(self)
         self.image_widget = ImageWidget(self.ROIs)
         self.log_widget = LogWidget(self.ROIs)
 
@@ -34,7 +31,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
 
     
     def init_ui(self):
-        self.title_bar = TitleBar(self)
+        self.title_bar = TitleBar(self, project_manager=self.project_manager)
         self.setMenuBar(self.title_bar)
         
         self.main_widget, self.main_layout = self.create_main_widget()
@@ -49,7 +46,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        self.init_widget = InitWidget(main_window=self)
+        self.init_widget = InitWidget(main_window=self, project_manager=self.project_manager)
         main_layout.addWidget(self.init_widget, alignment=QtCore.Qt.AlignCenter)
         
         return main_widget, main_layout
@@ -79,24 +76,11 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         """윈도우의 기본 속성을 설정합니다."""
         # 윈도우 제목 설정
         self.setWindowTitle("AstroMapper")
-        
-        # TODO: Widget별 window 최소 width도 지정
-        if sys.platform == "darwin":
-            # 최소 크기 설정
-            self.setMinimumSize(1000, 800)
-        else:
-            # 최소 크기 설정
-            self.setMinimumSize(1500, 1100)
-        
-        # 윈도우 상태 저장
-        self.save_window_state()
-    
-    def save_window_state(self):
-        """윈도우의 상태를 저장합니다."""
-        settings = QtCore.QSettings("AstroMapper", "MainWindow")
-        settings.setValue("geometry", self.saveGeometry())
-        settings.setValue("windowState", self.saveState())
-    
+
+        width, height, min_width, min_height = self.settings.get_window_size()
+        self.setMinimumSize(min_width, min_height)
+        self.resize(width, height)
+
     def initialize_project_config(self, project_config):
         self.project_config = project_config
         self.init_widget.project_config = self.project_config
@@ -112,6 +96,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         Args:
             event: 닫기 이벤트
         """
+        # TODO 저장여부 확인하고 저장할건지도 체크하자.
+        
         # 현재 윈도우 사이즈 및 splitter width 저장
         # TODO 저장 기능 추가
         if hasattr(self, 'project_config') and self.project_config:
@@ -123,5 +109,4 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
                 if len(sizes) >= 2:
                     self.project_config.set_splitter_widths(sizes[0], sizes[1])
             self.project_config.update_last_modified()
-            self.save_window_state()
         super().closeEvent(event)

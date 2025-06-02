@@ -3,9 +3,7 @@ from utils import get_resource_path
 from ui import AstromapperMainWindow, ImageWidget, LogWidget
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import QResource
-import logging
 import os
-import traceback
 from core.roi.ROI import ROIs
 import platform
 
@@ -18,23 +16,6 @@ def setup_application():
         app.setStyleSheet(f.read())
         
     return app
-
-def setup_logging():
-    formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
-
-    file_handler = logging.FileHandler('log.txt', encoding='utf-8')
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(formatter)
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.handlers = []
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
 
 def create_main_window():
     """메인 윈도우와 필요한 컴포넌트들을 생성합니다."""
@@ -76,11 +57,8 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 # TODO
 
 # diaglog 디자인 통일해서 바깥으로 빼기
-# 1. setting도 yaml로 바꿀것
 # 2. setting - 프로그램에 대한것 프로그램에 저장.
 # 3. config - 프로젝트에 대한것 프로젝트에 저장.
-# 4. 로그 저장 프로젝트 안으로 바꾸기
-# 5. 최종 폴더 image, result만 저장.
 # 6. setting은 프로그램 안에, config및 로그는 프로젝트 폴더 안에 바로. 임사파일은 .붙여서 관리하고 꺼질 때 삭제.
 
 # 디자인 파일 정리하기
@@ -108,8 +86,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 
 def main():
     """애플리케이션의 메인 진입점입니다."""
-
-    setup_logging()
 
     app = setup_application()
     window = create_main_window()

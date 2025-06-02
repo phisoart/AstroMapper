@@ -52,7 +52,6 @@ def mousePressEvent(self: 'ImageWidget', event):
             self.last_pos = event.pos()
         event.accept()
 
-# TODO: 어펜드 잘되게
 def mouseReleaseEvent(self: 'ImageWidget', event):
     if event.button() == QtCore.Qt.LeftButton:
         has_image, _ = self.project_config.get_image_settings()
@@ -204,66 +203,54 @@ def on_double_click(self: 'ImageWidget', event):
             self.update_img()
 
 def convert_qrect_window2image(self: 'ImageWidget', _window_rect):
-    if self.is_svs:
-        print("svs")
-        # TODO:svs
-        # _image_rect = QtCore.QRect(
-        #     int(max(0, (self.tmp_center.x() - (self.img_label.width() / 2 - _window_rect.x()) / self.zoom))),
-        #     int(max(0, (self.tmp_center.y() - (self.img_label.height() / 2 - _window_rect.y()) / self.zoom))),
-        #     int(min(self.img_width, _window_rect.width() / self.zoom)),
-        #     int(min(self.img_height, _window_rect.height() / self.zoom)))
-    else:
-        _image_rect = QtCore.QRect(
-            int(
-                max(
-                    0,
-                    (
-                        self.tmp_center.x()
-                        - (self.image_label.width() / 2 - _window_rect.x())
-                        / self.zoom
-                    ),
-                )
-            ),
-            int(
-                max(
-                    0,
-                    (
-                        self.tmp_center.y()
-                        - (self.image_label.height() / 2 - _window_rect.y())
-                        / self.zoom
-                    ),
-                )
-            ),
-            int(min(self.image_label.width(), _window_rect.width() / self.zoom)),
-            int(min(self.image_label.height(), _window_rect.height() / self.zoom)),
-        )
+    _image_rect = QtCore.QRect(
+        int(
+            max(
+                0,
+                (
+                    self.tmp_center.x()
+                    - (self.image_label.width() / 2 - _window_rect.x())
+                    / self.zoom
+                ),
+            )
+        ),
+        int(
+            max(
+                0,
+                (
+                    self.tmp_center.y()
+                    - (self.image_label.height() / 2 - _window_rect.y())
+                    / self.zoom
+                ),
+            )
+        ),
+        int(min(self.image_label.width(), _window_rect.width() / self.zoom)),
+        int(min(self.image_label.height(), _window_rect.height() / self.zoom)),
+    )
     return _image_rect
 
 def convert_qpoint_window2image(self: 'ImageWidget', _window_point):
-    if self.is_svs:
-        print("svs")
-        # TODO:svs
-    else:
-        _image_point = QtCore.QPoint(
-            int(
-                max(
-                    0,
-                    (
-                        self.tmp_center.x()
-                        - (self.image_label.width() / 2 - _window_point.x())
-                        / self.zoom
-                    ),
-                )
-            ),
-            int(
-                max(
-                    0,
-                    (
-                        self.tmp_center.y()
-                        - (self.image_label.height() / 2 - _window_point.y())
-                        / self.zoom
-                    ),
-                )
-            ),
-        )
+
+    _image_point = QtCore.QPoint(
+        int(
+            max(
+                0,
+                (
+                    self.tmp_center.x()
+                    - (self.image_label.width() / 2 - _window_point.x())
+                    / self.zoom
+                ),
+            )
+        ),
+        int(
+            max(
+                0,
+                (
+                    self.tmp_center.y()
+                    - (self.image_label.height() / 2 - _window_point.y())
+                    / self.zoom
+                ),
+            )
+        ),
+    )
     return _image_point

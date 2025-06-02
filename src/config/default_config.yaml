@@ -5,12 +5,6 @@ project:
   path: ""
   version: "0.1"
 
-settings:
-  image_folder: images
-  log_folder: logs
-  settings_folder: settings
-  result_folder: results
-
 window_size_windows:
   window_width: 1500
   window_height: 1100

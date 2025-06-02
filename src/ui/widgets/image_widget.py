@@ -132,10 +132,10 @@ class ImageWidget(QtWidgets.QWidget):
                 
                 # 이미지 파일 이름 가져오기
                 new_file_path = os.path.join(images_dir, os.path.basename(file_path))
-                # 이미지 파일 복사
+                # TODO:이미지 파일 복사
+                # 여기서 파일을 잘 복사하고 svs일때는 svs용으로 저장해서 추후에는 문제없게.
                 shutil.copy2(file_path, new_file_path)
-                # 이미지 설정 저장
-                # TODO: 저장 기능 추가
+
                 if self.project_config:
                     self.project_config.save_image_info(new_file_path)
                 
@@ -152,7 +152,6 @@ class ImageWidget(QtWidgets.QWidget):
     def load_image(self, _file_path: str):
         if _file_path:
             try:
-                # TODO: svs제작
                 # 이미지 로드
                 self.origin_img = QtGui.QPixmap(_file_path)
                 self.roi_layer = QtGui.QPixmap(self.origin_img.size())

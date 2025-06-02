@@ -9,9 +9,10 @@ import logging
 class TitleBar(QtWidgets.QMenuBar):
     """커스텀 타이틀바 위젯입니다."""
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, project_manager=None):
         super().__init__(parent)
         self.setFixedHeight(30)
+        self.project_manager = project_manager
         self.load_styles()
         self.init_ui()
         self.drag_position = None
@@ -66,16 +67,21 @@ class TitleBar(QtWidgets.QMenuBar):
 
     
     def create_project_menu(self):
-        # TODO: create project fuction추가
         self.project_menu = QMenu("Project", self)
         self.create_project_action = QAction("Create Project", self)
         self.create_project_action.setShortcut("Ctrl+N")
         self.project_menu.addAction(self.create_project_action)
+        self.create_project_action.triggered.connect(lambda: self.project_manager.open_project(is_new=True))
 
-        # TODO: open project fuction추가
         self.open_project_action = QAction("Open Project", self)
         self.open_project_action.setShortcut("Ctrl+O")
         self.project_menu.addAction(self.open_project_action)
+        self.open_project_action.triggered.connect(lambda: self.project_manager.open_project(is_new=False))
+
+        # Recent Project를 QMenu로 서브메뉴화
+        self.recent_project_menu = QMenu("Recent Project", self)
+        self.recent_project_menu.aboutToShow.connect(self.update_recent_project_menu)
+        self.project_menu.addMenu(self.recent_project_menu)
 
         self.project_menu.addSeparator()
 
@@ -97,6 +103,17 @@ class TitleBar(QtWidgets.QMenuBar):
         self.project_menu.addAction(self.exit_action)
 
         return self.project_menu
+
+    def update_recent_project_menu(self):
+        self.recent_project_menu.clear()
+        recent_projects = self.project_manager.settings.get_recent_projects()
+        if not recent_projects:
+            self.recent_project_menu.addAction("No recent projects found.").setEnabled(False)
+        else:
+            for project in recent_projects:
+                action = QAction(project, self)
+                action.triggered.connect(lambda checked, p=project: self.project_manager.open_recent_project(p))
+                self.recent_project_menu.addAction(action)
 
     def create_edit_menu(self):
         self.edit_menu = QMenu("Edit", self)
@@ -268,4 +285,4 @@ class TitleBar(QtWidgets.QMenuBar):
                 if event.button() == QtCore.Qt.LeftButton:
                     self.drag_position = None
                     return True
-        return super().eventFilter(obj, event) 
+        return super().eventFilter(obj, event)
