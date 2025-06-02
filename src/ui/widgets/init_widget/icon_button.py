@@ -10,13 +10,13 @@ class IconButton(QtWidgets.QPushButton):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(8)
-        # 아이콘
+        # icon
         icon_label = QtWidgets.QLabel()
         icon_pixmap = QtGui.QPixmap(icon_path)
         icon_label.setPixmap(icon_pixmap.scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         icon_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         layout.addWidget(icon_label)
-        # 텍스트
+        # text
         text_label = QtWidgets.QLabel(text)
         text_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         text_label.setObjectName("buttonText")

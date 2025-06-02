@@ -11,74 +11,53 @@ from core.roi import ROIs
 import logging
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
-    """AstroMapper 애플리케이션의 메인 윈도우 클래스입니다."""
     
     def __init__(
         self,
         parent: Optional[QtWidgets.QWidget] = None
     ):
-        """
-        메인 윈도우를 초기화합니다.
-        
-        Args:
-            image_widget: 이미지 위젯
-            log_widget: 로그 위젯
-            parent: 부모 위젯
-        """
         super().__init__(parent, QtCore.Qt.FramelessWindowHint)
-        logging.info("Hi")
         self.is_init_view = True
         self.is_saved = True
         self.is_project = False
 
         self.project_dir = None
         self.ROIs = ROIs()
+        self.project_config = None
 
         self.image_widget = ImageWidget(self.ROIs)
         self.log_widget = LogWidget(self.ROIs)
-        # 위젯 추가
-        self.image_widget.setMinimumWidth(400)  # 최소 너비 설정
-        self.log_widget.setMinimumWidth(280)  # 최소 너비 설정
 
         self.init_ui()
 
         self.setup_window_properties()
-        # self.load_styles()
 
     
     def init_ui(self):
-        """UI 컴포넌트들을 초기화하고 레이아웃을 설정합니다."""
-
         self.title_bar = TitleBar(self)
         self.setMenuBar(self.title_bar)
-        self.status_bar = StatusBar(self)
-        self.setStatusBar(self.status_bar)
         
         self.main_widget, self.main_layout = self.create_main_widget()
         self.setCentralWidget(self.main_widget)
-    
+
+        self.status_bar = StatusBar(self)
+        self.setStatusBar(self.status_bar)
+
     def create_main_widget(self):
         main_widget = QtWidgets.QWidget()
         main_layout = QtWidgets.QVBoxLayout(main_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        init_widget = self.create_init_widget()
-        main_layout.addWidget(init_widget, alignment=QtCore.Qt.AlignCenter)
+        self.init_widget = InitWidget(main_window=self)
+        main_layout.addWidget(self.init_widget, alignment=QtCore.Qt.AlignCenter)
         
         return main_widget, main_layout
-
-    def create_init_widget(self):
-        init_widget = InitWidget(main_window=self)
-        init_widget.create_btn.clicked.connect(self.create_project)
-        init_widget.open_btn.clicked.connect(self.open_project)
-        return init_widget
 
     def create_project_view_widget(self):
         splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         splitter.setChildrenCollapsible(False)  # 자식 위젯이 완전히 접히지 않도록 설정
         splitter.setHandleWidth(2)  # 핸들 너비 설정
-        # 위젯 추가
         splitter.addWidget(self.image_widget)
         splitter.addWidget(self.log_widget)
         return splitter
@@ -96,18 +75,12 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.project_view_widget = self.create_project_view_widget()
         self.main_layout.addWidget(self.project_view_widget)
 
-    def load_styles(self):
-        """QSS 스타일시트를 로드합니다."""
-        style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
-        if os.path.exists(style_path):
-            with open(style_path, "r", encoding="utf-8") as f:
-                self.message_box_style = f.read()
-
     def setup_window_properties(self):
         """윈도우의 기본 속성을 설정합니다."""
         # 윈도우 제목 설정
         self.setWindowTitle("AstroMapper")
         
+        # TODO: Widget별 window 최소 width도 지정
         if sys.platform == "darwin":
             # 최소 크기 설정
             self.setMinimumSize(1000, 800)
@@ -124,6 +97,14 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
     
+    def initialize_project_config(self, project_config):
+        self.project_config = project_config
+        self.init_widget.project_config = self.project_config
+        self.image_widget.project_config = self.project_config
+        self.log_widget.project_config = self.project_config
+        self.image_widget.tool_bar.project_config = self.project_config
+        self.image_widget.tool_bar.update_color_combo()
+
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
         윈도우가 닫힐 때 호출되는 이벤트 핸들러입니다.
@@ -144,148 +125,3 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             self.project_config.update_last_modified()
             self.save_window_state()
         super().closeEvent(event)
-
-    def open_project(self, _project_dir: str = None):
-        # TODO:
-        # 정상적인 프로젝트인지 확인하고 세팅값 로딩
-        # 지금이 시작지점인지 확인
-        # 시작지점 아니라면 저장여부 뭍고 초기화하고 그다음에 open_project
-        
-        if _project_dir:
-            project_dir = _project_dir
-        else:
-            project_dir = QtWidgets.QFileDialog.getExistingDirectory(
-                self,
-                "Select Project Location",
-                "",
-                QtWidgets.QFileDialog.ShowDirsOnly
-            )
-        
-        if not project_dir:  # 사용자가 취소한 경우
-            return
-
-        # project_config.yaml 파일이 이미 존재하는지 확인
-        config_path = os.path.join(project_dir, "settings", "project_config.yaml")
-        if not os.path.exists(config_path):
-            msg_box = QtWidgets.QMessageBox(self)
-            msg_box.setWindowTitle("Error")
-            msg_box.setText("No project exists. Please create a new project.")
-            msg_box.setStyleSheet(self.message_box_style)
-            # 모든 자식 위젯에 스타일 강제 적용
-            for child in msg_box.findChildren(QtWidgets.QWidget):
-                child.setStyleSheet(self.message_box_style)
-            msg_box.exec()
-            return
-
-        # 버전 체크: default_config.yaml과 다르면 에러
-        default_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "default_config.yaml"))
-        with open(default_config_path, 'r', encoding='utf-8') as f:
-            default_config = yaml.safe_load(f)
-        default_version = default_config.get('project', {}).get('version')
-        with open(config_path, 'r', encoding='utf-8') as f:
-            loaded_config = yaml.safe_load(f)
-        current_version = loaded_config.get('project', {}).get('version')
-        if current_version != default_version:
-            msg_box = QtWidgets.QMessageBox(self)
-            msg_box.setWindowTitle("Error")
-            msg_box.setText(f"Project version mismatch!\nCurrent: {current_version} / Required: {default_version}\nPlease create a new project.")
-            msg_box.setStyleSheet(self.message_box_style)
-            for child in msg_box.findChildren(QtWidgets.QWidget):
-                child.setStyleSheet(self.message_box_style)
-            msg_box.exec()
-            return
-
-        # 프로젝트 설정 초기화
-        self.project_dir = project_dir
-        self.image_widget.project_dir = project_dir
-
-        self.project_config = ProjectConfig(project_dir)
-        self.image_widget.project_config = self.project_config
-        self.log_widget.project_config = self.project_config
-        self.image_widget.tool_bar.project_config = self.project_config
-        self.image_widget.tool_bar.update_color_combo()
-        # 최근 프로젝트 목록에 추가
-        settings = Settings()
-        settings.add_recent_project(project_dir)
-
-        # 윈도우/스플리터 크기 복원
-        settings_dict = self.project_config.get_window_size()
-        window_width = settings_dict.get("window_width", 1500)
-        window_height = settings_dict.get("window_height", 1100)
-        image_widget_width = settings_dict.get("image_widget_width", 899)
-        log_widget_width = settings_dict.get("log_widget_width", 599)
-        self.resize(window_width, window_height)
-        # InitView 제거 및 분할 위젯 표시
-        self.show_project_view_widget()
-        self.project_view_widget.setSizes([image_widget_width, log_widget_width])
-
-
-        # 상태바에 프로젝트 경로 표시 (30자 초과시 앞부분을 ...으로 표시)
-        display_path = project_dir
-        if len(project_dir) > 30:
-            display_path = "..." + project_dir[-30:]
-        self.status_bar.showLeftMessage(f"Project: {display_path}")
-        _has_img, _img_settings = self.project_config.get_image_settings()
-        if _has_img:
-            self.image_widget.load_image(_img_settings["path"])
-        self.log_widget.update_log_frame()
-
-    def create_project(self):
-        # 지금이 시작지점인지 확인
-        # 시작지점 아니라면 저장여부 뭍고 초기화하고 그다음에 create_project
-        """새 프로젝트를 생성하고 메인 화면으로 전환합니다."""
-        # 프로젝트 폴더 생성
-        project_dir = QtWidgets.QFileDialog.getExistingDirectory(
-            self,
-            "Select Project Location",
-            "",
-            QtWidgets.QFileDialog.ShowDirsOnly
-        )
-        
-        if not project_dir:  # 사용자가 취소한 경우
-            return
-        
-        # project_config.yaml 파일이 이미 존재하는지 확인
-        config_path = os.path.join(project_dir, "settings", "project_config.yaml")
-        if os.path.exists(config_path):
-            msg_box = QtWidgets.QMessageBox(self)
-            msg_box.setWindowTitle("Error")
-            msg_box.setText("A project already exists in this directory.")
-            msg_box.setStyleSheet(self.message_box_style)
-            # 모든 자식 위젯에 스타일 강제 적용
-            for child in msg_box.findChildren(QtWidgets.QWidget):
-                child.setStyleSheet(self.message_box_style)
-            msg_box.exec()
-            return
-            
-        # 프로젝트 설정 초기화
-        self.project_dir = project_dir
-        self.image_widget.project_dir = project_dir
-
-        folder_path = os.path.join(project_dir, "settings")
-        os.makedirs(folder_path, exist_ok=True)
-
-        self.project_config = ProjectConfig(project_dir)
-        self.image_widget.project_config = self.project_config
-        self.log_widget.project_config = self.project_config
-        # 프로젝트 하위 폴더 생성
-        settings = self.project_config.get_settings("settings")
-        for folder in settings.values():
-            if folder == "settings":
-                continue
-            folder_path = os.path.join(project_dir, folder)
-            os.makedirs(folder_path, exist_ok=True)
-        
-        # 최근 프로젝트 목록에 추가
-        settings = Settings()
-        settings.add_recent_project(project_dir)
-        
-        # InitView 제거 및 분할 위젯 표시
-        self.show_project_view()
-        # 상태바에 프로젝트 정보 표시
-        project_info = self.project_config.get_settings("project")
-        display_path = project_info["path"]
-        if len(display_path) > 30:
-            display_path = "..." + display_path[-30:]
-        self.status_bar.showLeftMessage(f"Project: {display_path}")
-        self.log_widget.update_log_frame()

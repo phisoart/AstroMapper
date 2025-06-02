@@ -11,15 +11,15 @@ from utils import get_resource_path
 class ProjectConfig:
     """프로젝트 설정을 관리하는 클래스입니다."""
     
-    def __init__(self, project_path: str):
+    def __init__(self, project_dir: str):
         """
         프로젝트 설정을 초기화합니다.
         
         Args:
-            project_path: 프로젝트 루트 디렉토리 경로
+            project_dir: 프로젝트 루트 디렉토리 경로
         """
-        self.project_path = project_path
-        self.config_path = os.path.join(project_path, "settings", "project_config.yaml")
+        self.project_dir = project_dir
+        self.config_path = os.path.join(project_dir, "settings", "project_config.yaml")
         self.config: Dict = {}
 
         # 설정 파일이 없으면 새로 생성
@@ -36,8 +36,8 @@ class ProjectConfig:
                 self.config = yaml.safe_load(f)
             # 프로젝트별로 name, path, created_date, last_modified만 갱신 (시:분까지)
             now = datetime.now().strftime("%Y-%m-%d %H:%M")
-            self.config["project"]["name"] = os.path.basename(self.project_path)
-            self.config["project"]["path"] = self.project_path
+            self.config["project"]["name"] = os.path.basename(self.project_dir)
+            self.config["project"]["path"] = self.project_dir
             self.config["project"]["created_date"] = now
             self.config["project"]["last_modified"] = now
         except Exception as e:

@@ -90,3 +90,22 @@
 [2025-06-02 17:06:46,927][license_dialog.py:14][INFO] Open LicenseDialog
 [2025-06-02 17:06:46,930][title_bar.py:226][INFO] end show_license_dialog
 [2025-06-02 17:09:52,814][main_window.py:29][INFO] Hi
+[2025-06-02 20:00:06,142][init_widget.py:180][INFO] open_project: True, None
+[2025-06-02 20:00:07,562][init_widget.py:180][INFO] open_project: True, None
+[2025-06-02 20:01:01,042][init_widget.py:180][INFO] open_project: True, None
+[2025-06-02 20:03:14,162][init_widget.py:180][INFO] open_project: True, None
+[2025-06-02 20:04:31,586][init_widget.py:180][INFO] open_project: True, None
+[2025-06-02 20:04:34,413][init_widget.py:194][INFO] open_project: True, C:/Users/royjang/Desktop/aa
+[2025-06-02 20:05:44,134][init_widget.py:182][INFO] open_project: True, None
+[2025-06-02 20:05:46,884][init_widget.py:196][INFO] open_project: True, C:/Users/royjang/Desktop/aa
+[2025-06-02 20:06:07,294][init_widget.py:182][INFO] open_project: True, None
+[2025-06-02 20:06:10,507][init_widget.py:196][INFO] open_project: True, C:/Users/royjang/Desktop/aa
+[2025-06-02 20:07:19,114][init_widget.py:182][INFO] open_project: True, None
+[2025-06-02 20:07:21,593][init_widget.py:196][INFO] open_project: True, C:/Users/royjang/Desktop/aa
+[2025-06-02 20:08:38,162][init_widget.py:182][INFO] open_project: True, None
+[2025-06-02 20:08:41,438][init_widget.py:196][INFO] open_project: True, C:/Users/royjang/Desktop/aa
+[2025-06-02 20:08:41,438][init_widget.py:209][INFO] open_project: True, C:/Users/royjang/Desktop/aa - 1
+[2025-06-02 20:34:17,986][init_widget.py:179][INFO] open_project: True, None
+[2025-06-02 20:34:36,016][title_bar.py:224][INFO] show_license_dialog
+[2025-06-02 20:34:36,016][license_dialog.py:14][INFO] Open LicenseDialog
+[2025-06-02 20:34:36,020][title_bar.py:226][INFO] end show_license_dialog

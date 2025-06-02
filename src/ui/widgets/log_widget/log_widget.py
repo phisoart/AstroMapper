@@ -24,9 +24,9 @@ class LogWidget(QtWidgets.QWidget):
 
     def __init__(self, ROIs):
         super().__init__()
-        self.ROIs = ROIs      
-        
+        self.ROIs = ROIs  
         self.project_config = None
+        
         self.legend_widgets = []
         self.log_rows = []
         self.selected_rows = []
@@ -372,13 +372,13 @@ class LogWidget(QtWidgets.QWidget):
     def on_save_clicked(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.ReadOnly
-        # project_path를 기본 경로로 사용
+        # project_dir 기본 경로로 사용
         default_dir = ""
         if self.project_config is not None:
-            if hasattr(self.project_config, 'project_path'):
-                default_dir = self.project_config.project_path
+            if hasattr(self.project_config, 'project_dir'):
+                default_dir = self.project_config.project_dir
             elif hasattr(self.project_config, 'get'):
-                default_dir = self.project_config.get('project_path', "")
+                default_dir = self.project_config.get('project_dir', "")
         default_dir = os.path.join(default_dir, "results")
         # results/tmp 폴더가 없으면 생성
         tmp_dir = os.path.join(default_dir, "tmp")
@@ -427,10 +427,10 @@ class LogWidget(QtWidgets.QWidget):
     def on_load_clicked(self):
         default_dir = ""
         if self.project_config is not None:
-            if hasattr(self.project_config, 'project_path'):
-                default_dir = self.project_config.project_path
+            if hasattr(self.project_config, 'project_dir'):
+                default_dir = self.project_config.project_dir
             elif hasattr(self.project_config, 'get'):
-                default_dir = self.project_config.get('project_path', "")
+                default_dir = self.project_config.get('project_dir', "")
         default_dir = os.path.join(default_dir, "results")
         # results/tmp 폴더가 없으면 생성
         tmp_dir = os.path.join(default_dir, "tmp")

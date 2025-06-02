@@ -14,8 +14,8 @@ class ImageWidget(QtWidgets.QWidget):
     def __init__(self, ROIs):
         super().__init__()
         self.setObjectName("imageWidget")
-
         # 여기 있는 것들 로드 되도록.
+        self.project_config = None
         self.ROIs = ROIs
         self.project_dir = None
         self.origin_img = None
@@ -25,7 +25,6 @@ class ImageWidget(QtWidgets.QWidget):
         self.select_roi_on = False
         self.drawing_rect = QtCore.QRect()
         self.init_window_ratio = None
-        self.project_config = None
         self.tool_bar_roi_on = False
 
         self.is_square = True
@@ -119,7 +118,7 @@ class ImageWidget(QtWidgets.QWidget):
         if file_path:
             try:
                 # 현재 프로젝트 폴더의 images 폴더 경로 가져오기
-                if not self.project_dir:
+                if not self.main_window.project_dir:
                     QtWidgets.QMessageBox.warning(
                         self,
                         "Warning",
@@ -127,7 +126,7 @@ class ImageWidget(QtWidgets.QWidget):
                     )
                     return
                 
-                images_dir = os.path.join(self.project_dir, "images")
+                images_dir = os.path.join(self.main_window.project_dir, "images")
                 if not os.path.exists(images_dir):
                     os.makedirs(images_dir)
                 
