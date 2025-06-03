@@ -17,7 +17,7 @@ class LicenseDialog(QtWidgets.QDialog):
 
     def load_styles(self):
         """QSS 스타일시트를 로드합니다."""
-        style_path = get_resource_path(os.path.join("src", "ui", "styles", "license_dialog.qss"))
+        style_path = get_resource_path(os.path.join("src", "ui", "styles", "dialog.qss"))
         with open(style_path, "r", encoding="utf-8") as f:
             self.setStyleSheet(f.read())
     

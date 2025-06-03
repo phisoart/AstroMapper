@@ -5,7 +5,11 @@ from utils.settings import Settings
 from utils.config import ProjectConfig
 import yaml
 from utils.helper import get_resource_path
+from ui.dialogs.error_dialog import ErrorDialog
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from core.temp_config_manager import TempConfigManager
 
 def setup_logging(project_dir: str):
     formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
@@ -26,6 +30,7 @@ class ProjectManager:
     def __init__(self, main_window):
         self.main_window = main_window
         self.settings = Settings()
+        self.temp_config_manager: 'TempConfigManager' = main_window.temp_config_manager
 
     def check_project_config(self, project_dir: str):
         config_path = os.path.join(project_dir, "project_config.yaml")
@@ -47,14 +52,13 @@ class ProjectManager:
         return True
 
     def show_error_msg(self, error_msg: str):
-        msg_box = QtWidgets.QMessageBox(self.main_window)
-        msg_box.setWindowTitle("Error")
-        msg_box.setText(error_msg)
-        msg_box.exec()
+        dialog = ErrorDialog(error_msg, self.main_window)
+        dialog.exec()
 
     def initialize_project(self, project_dir: str):
         setup_logging(project_dir)
         self.main_window.project_dir = project_dir
+        self.temp_config_manager.set_project_dir(project_dir)
         self.main_window.initialize_project_config(ProjectConfig(project_dir))
         self.settings.add_recent_project(project_dir)
         display_path = project_dir
@@ -98,7 +102,7 @@ class ProjectManager:
                 return
         self.initialize_project(project_dir)
         if is_new:
-            sub_folders = self.main_window.project_config.get_config("sub_folder")
+            sub_folders = self.main_window.settings.get("sub_folder")
             for folder in sub_folders.values():
                 folder_path = os.path.join(project_dir, folder)
                 os.makedirs(folder_path, exist_ok=True)
@@ -116,3 +120,7 @@ class ProjectManager:
     def open_recent_project(self, project_dir):
         if os.path.exists(project_dir):
             self.open_project(is_new=False, _project_dir=project_dir) 
+
+    def save_current_project(self):
+        if self.main_window.temp_config_manager.is_exist_temp_config():
+            self.main_window.temp_config_manager.save_config()

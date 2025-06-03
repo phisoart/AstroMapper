@@ -4,6 +4,8 @@ from ui.widgets import ImageWidget, LogWidget, TitleBar, ToolBar, StatusBar, Ini
 from core.roi import ROIs
 from utils.settings import Settings
 from core.project_manager import ProjectManager
+from core.temp_config_manager import TempConfigManager
+import logging
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
     
@@ -21,6 +23,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.project_config = None
 
         self.settings = Settings()
+        self.temp_config_manager = TempConfigManager(self)
         self.project_manager = ProjectManager(self)
         self.image_widget = ImageWidget(self.ROIs)
         self.log_widget = LogWidget(self.ROIs)
@@ -97,16 +100,9 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
             event: 닫기 이벤트
         """
         # TODO 저장여부 확인하고 저장할건지도 체크하자.
-        
+        # 아래 것들은 최종적으로는 save 함수에서 처리
         # 현재 윈도우 사이즈 및 splitter width 저장
-        # TODO 저장 기능 추가
-        if hasattr(self, 'project_config') and self.project_config:
-            size = self.size()
-            self.project_config.set_window_size(size.width(), size.height())
-            # splitter 각 위젯 width 저장
-            if hasattr(self, 'project_view_widget'):
-                sizes = self.project_view_widget.sizes()
-                if len(sizes) >= 2:
-                    self.project_config.set_splitter_widths(sizes[0], sizes[1])
-            self.project_config.update_last_modified()
+        if hasattr(self, 'temp_config_manager') and self.temp_config_manager.is_exist_temp_config():
+            self.temp_config_manager.remove_temp_config()
+
         super().closeEvent(event)

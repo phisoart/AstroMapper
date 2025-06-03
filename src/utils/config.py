@@ -59,11 +59,7 @@ class ProjectConfig:
                 yaml.dump(self.config, f, allow_unicode=True, sort_keys=False)
         except Exception as e:
             print(f"config.py설정 파일 저장 중 오류 발생: {e}")
-    
-    def update_last_modified(self):
-        """마지막 수정 시간을 업데이트합니다."""
-        self.config["project"]["last_modified"] = datetime.now().strftime("%Y-%m-%d")
-        self.save_config()
+
     
     def save_image_info(self, image_path: str):
         """
@@ -72,7 +68,6 @@ class ProjectConfig:
         Args:
             image_path: 이미지 파일의 경로
         """
-        # TODO: svs도 적용되게
         try:
             # 파일 크기 가져오기
             file_size = os.path.getsize(image_path)
@@ -152,31 +147,6 @@ class ProjectConfig:
             else:
                 visible_list.append(log_widget_config.get(col, True))  # 설정이 없으면 True 
         return visible_list
-
-    def set_window_size(self, width: int, height: int):
-        """
-        현재 윈도우 사이즈를 config에 저장합니다.
-        Args:
-            width (int): 윈도우 너비
-            height (int): 윈도우 높이
-        """
-        os_specific_name = f"window_size_{'mac' if sys.platform == 'darwin' else 'windows'}"
-
-        self.config.setdefault(os_specific_name, {})
-        self.config[os_specific_name]["window_width"] = width
-        self.config[os_specific_name]["window_height"] = height
-        self.save_config()
-
-    def set_splitter_widths(self, image_width: int, log_width: int):
-        """
-        splitter의 각 위젯(이미지, 로그)의 width를 config에 저장합니다.
-        """
-        os_specific_name = f"window_size_{'mac' if sys.platform == 'darwin' else 'windows'}"
-
-        self.config.setdefault(os_specific_name, {})
-        self.config[os_specific_name]["image_widget_width"] = image_width
-        self.config[os_specific_name]["log_widget_width"] = log_width
-        self.save_config()
 
     def set_log_widget_widths(self, widths: list):
         self.config.setdefault("log_widget", {})
