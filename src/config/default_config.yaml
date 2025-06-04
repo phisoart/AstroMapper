@@ -28,6 +28,9 @@ image:
 tool:
   color: "#FF0000"
   color_name: "Red"
+  same_well_on: false
+  roi_on: false
+  cross_visible: false
 
 log_widget:
   "checkbox": true

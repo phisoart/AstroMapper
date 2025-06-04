@@ -122,5 +122,5 @@ class ProjectManager:
             self.open_project(is_new=False, _project_dir=project_dir) 
 
     def save_current_project(self):
-        if self.main_window.temp_config_manager.is_exist_temp_config():
+        if self.main_window.temp_config_manager:
             self.main_window.temp_config_manager.save_config()

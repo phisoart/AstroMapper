@@ -54,7 +54,6 @@ class ROIs(QtCore.QObject):  # QObject 상속
         _ROI.y = _ROI.rect.y()
         _ROI.width = _ROI.rect.width()
         _ROI.height = _ROI.rect.height()
-        # TODO 이전 연결해서 복사해주는 기능 추가
         if _ROI.note == "":
             _ROI.note = str(self.__len + 1)
         if _ROI.well == "":

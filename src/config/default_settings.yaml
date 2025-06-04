@@ -3,12 +3,16 @@ window:
   height: 1100
   min_width: 1500
   min_height: 1100
+  image_widget_width: 899
+  log_widget_width: 599
 
 darwin:
   width: 1000
   height: 800
   min_width: 1000
   min_height: 800
+  image_widget_width: 599
+  log_widget_width: 399
 
 sub_folder:
   image_folder: image

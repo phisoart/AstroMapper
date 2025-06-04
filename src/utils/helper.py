@@ -17,7 +17,6 @@ def get_resource_path(relative_path: str) -> str:
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(base_path, relative_path)
 
-
 def open_webpage(url: str) -> None:
     """
     기본 웹 브라우저에서 지정된 URL을 엽니다.
@@ -28,7 +27,7 @@ def open_webpage(url: str) -> None:
     webbrowser.open(url)
 
 def mousePressEvent(self: 'ImageWidget', event):
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if event.button() == QtCore.Qt.LeftButton:
         if has_image and (event.modifiers() == QtCore.Qt.ShiftModifier or self.tool_bar_roi_on):
             self.current_ROI.rect = QtCore.QRect(
@@ -43,7 +42,7 @@ def mousePressEvent(self: 'ImageWidget', event):
         #             )
         #         )
         #         self.marker_status[self.marker_state] = True
-        #         self.update_img(True)
+        #         self.update_image(True)
         #         self.marker_state = -1
         #         self.update_marker_btns()
         # else:
@@ -54,7 +53,7 @@ def mousePressEvent(self: 'ImageWidget', event):
 
 def mouseReleaseEvent(self: 'ImageWidget', event):
     if event.button() == QtCore.Qt.LeftButton:
-        has_image, _ = self.project_config.get_image_settings()
+        has_image, _ = self.project_config.get_image_info()
         self.dragging = False
         if has_image and self.select_roi_on:
             self.select_roi_on = False
@@ -90,7 +89,7 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
             self.current_ROI.color = QtGui.QColor(color_hex)
             self.ROIs.appendROI(copy.deepcopy(self.current_ROI))
             self.append_roi_layer(self.current_ROI)
-            self.update_img()
+            self.update_image()
             self.updateLogSignal.emit()
         else:
             self.select_roi_on = False
@@ -98,7 +97,7 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
 
 
 def mouseMoveEvent(self: 'ImageWidget', event):
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if has_image and self.select_roi_on:
         xmin, xmax = min(self.current_ROI.rect.x(), event.pos().x()), max(
             self.current_ROI.rect.x(), event.pos().x()
@@ -112,7 +111,7 @@ def mouseMoveEvent(self: 'ImageWidget', event):
         if self.current_ROI.rect.y() > event.pos().y() and int(ymax - ymin) > len:
             ymin = self.current_ROI.rect.y() - len
         self.drawing_rect = QtCore.QRect(int(xmin), int(ymin), len, len)
-        self.update_img()
+        self.update_image()
         event.accept()
     if self.dragging:
         # Calculate the movement vector based on the current and last positions
@@ -123,11 +122,11 @@ def mouseMoveEvent(self: 'ImageWidget', event):
         # Move the pixmap and update tmp_center
         self.tmp_center.setX(self.tmp_center.x() - delta.x() / self.zoom)
         self.tmp_center.setY(self.tmp_center.y() - delta.y() / self.zoom)
-        self.update_img()
+        self.update_image()
         event.accept()
     
     # 마우스 위치를 이미지 좌표로 변환하여 상태바에 표시
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if has_image:
         x = int((event.pos().x() - self.image_label.width() / 2) / self.zoom + self.tmp_center.x())
         y = int((event.pos().y() - self.image_label.height() / 2) / self.zoom + self.tmp_center.y())
@@ -152,7 +151,7 @@ def wheelEvent(self: 'ImageWidget', event: QtGui.QWheelEvent):
 def on_size_changed(self: 'ImageWidget', event):
     # This function will be called whenever self.image_label is resized
     print("Image label resized to: ", self.image_label.size())
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if has_image:
         self.sub_img_size = int(
             max(min(self.image_label.width() / 3, self.image_label.height() / 3), 200)
@@ -165,27 +164,27 @@ def on_size_changed(self: 'ImageWidget', event):
             self.zoom = self.zoom * self.image_label.width() / self.last_window_size.width()
         self.last_window_size = self.image_label.size()
 
-        self.update_img()
+        self.update_image()
 
 
 def zoom_in(self):
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if has_image:
         if not self.zoom_max < self.zoom * self.zoom_speed:
             self.zoom *= self.zoom_speed
         else:
             self.zoom = self.zoom_max
-        self.update_img()
+        self.update_image()
 
 
 def zoom_out(self):
-    has_image, _ = self.project_config.get_image_settings()
+    has_image, _ = self.project_config.get_image_info()
     if has_image:
         if not self.zoom_min > self.zoom / self.zoom_speed:
             self.zoom /= self.zoom_speed
         else:
             self.zoom = self.zoom_min
-        self.update_img()
+        self.update_image()
 
 def on_double_click(self: 'ImageWidget', event):
     """
@@ -195,12 +194,12 @@ def on_double_click(self: 'ImageWidget', event):
         event: QEvent
     """
     if event.type() == QtCore.QEvent.MouseButtonDblClick:
-        has_image, _ = self.project_config.get_image_settings()
+        has_image, _ = self.project_config.get_image_info()
         if has_image and self.origin_img is not None:
             x = int((event.pos().x() - self.image_label.width() / 2) / self.zoom + self.tmp_center.x())
             y = int((event.pos().y() - self.image_label.height() / 2) / self.zoom + self.tmp_center.y())
             self.tmp_center = QtCore.QPointF(x, y)
-            self.update_img()
+            self.update_image()
 
 def convert_qrect_window2image(self: 'ImageWidget', _window_rect):
     _image_rect = QtCore.QRect(

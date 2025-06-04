@@ -91,10 +91,12 @@ class TitleBar(QtWidgets.QMenuBar):
         self.save_project_action.setEnabled(True)
         self.save_project_action.triggered.connect(self.project_manager.save_current_project)
 
-        self.save_project_as_action = QAction("Save Project As", self)
-        self.save_project_as_action.setShortcut("Ctrl+Shift+S")
-        self.project_menu.addAction(self.save_project_as_action)
-        self.save_project_as_action.setEnabled(False)
+
+        # TODO 추후에 추가
+        # self.save_project_as_action = QAction("Save Project As", self)
+        # self.save_project_as_action.setShortcut("Ctrl+Shift+S")
+        # self.project_menu.addAction(self.save_project_as_action)
+        # self.save_project_as_action.setEnabled(False)
 
         self.project_menu.addSeparator()
 

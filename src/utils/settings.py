@@ -112,4 +112,14 @@ class Settings:
         height = base.get('height', 1100)
         min_width = base.get('min_width', 1500)
         min_height = base.get('min_height', 1100)
+
         return width, height, min_width, min_height
+
+    def get_project_view_widget_width(self):
+        if sys.platform == "darwin":
+            base = self.get('darwin', {})
+        else:
+            base = self.get('window', {})
+        image_widget_width = base.get('image_widget_width', 899)
+        log_widget_width = base.get('log_widget_width', 599)
+        return image_widget_width, log_widget_width

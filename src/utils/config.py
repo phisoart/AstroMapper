@@ -181,3 +181,6 @@ class ProjectConfig:
         self.config.setdefault("tool", {})
         self.config["tool"]["color"] = color
         self.save_config()
+
+    def get(self, category, key):
+        return self.config.get(category, {}).get(key, None)

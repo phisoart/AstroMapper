@@ -6,21 +6,30 @@ from utils import helper
 from utils.settings import Settings
 from core.roi.ROI import ROIs, ROI
 from ui.widgets.tool_bar import ToolBar
+from typing import TYPE_CHECKING
+from ui.dialogs.error_dialog import ErrorDialog
+import logging
+
+if TYPE_CHECKING:
+    from utils.config import ProjectConfig
+    from core.temp_config_manager import TempConfigManager
+
 class ImageWidget(QtWidgets.QWidget):
     openImgSignal = QtCore.Signal(bool)  # 사용자 정의 시그널
     updateLogSignal = QtCore.Signal()
     connectSignal = QtCore.Signal(bool)
 
-    def __init__(self, ROIs):
+    def __init__(self, ROIs: ROIs, main_window):
         super().__init__()
         self.setObjectName("imageWidget")
+        self.main_window = main_window # type: ignore
+        self.temp_config_manager: 'TempConfigManager' = self.main_window.temp_config_manager
         # 여기 있는 것들 로드 되도록.
-        self.project_config = None
+        self.project_config: 'ProjectConfig' = None
         self.ROIs = ROIs
         self.project_dir = None
         self.origin_img = None
         self.sub_img = None
-        self.is_svs = False
         self.dragging = False
         self.select_roi_on = False
         self.drawing_rect = QtCore.QRect()
@@ -55,6 +64,8 @@ class ImageWidget(QtWidgets.QWidget):
 
         # 중앙 레이아웃 설정
         self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout.setSpacing(0)  # 간격 제거
+        self.layout.setContentsMargins(0, 0, 0, 0)  # 마진 제거
         self.layout.setAlignment(QtCore.Qt.AlignCenter)
         self.tool_bar = ToolBar(self)
         self.layout.addWidget(self.tool_bar)
@@ -107,6 +118,10 @@ class ImageWidget(QtWidgets.QWidget):
             with open(style_path, "r", encoding="utf-8") as f:
                 self.setStyleSheet(f.read())
 
+    def show_error_msg(self, error_msg: str):
+        dialog = ErrorDialog(error_msg, self.main_window)
+        dialog.exec()
+
     def open_image(self):     
         """이미지 파일을 선택하고 프로젝트 폴더로 복사한 후 로드합니다."""
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
@@ -118,15 +133,11 @@ class ImageWidget(QtWidgets.QWidget):
         if file_path:
             try:
                 # 현재 프로젝트 폴더의 images 폴더 경로 가져오기
-                if not self.main_window.project_dir:
-                    QtWidgets.QMessageBox.warning(
-                        self,
-                        "Warning",
-                        "Please create a project first."
-                    )
+                if not self.project_config.project_dir:
+                    self.show_error_msg("Please create a project first.")
                     return
                 
-                images_dir = os.path.join(self.main_window.project_dir, "images")
+                images_dir = os.path.join(self.project_config.project_dir, "images")
                 if not os.path.exists(images_dir):
                     os.makedirs(images_dir)
                 
@@ -142,12 +153,7 @@ class ImageWidget(QtWidgets.QWidget):
                 self.load_image(new_file_path)
             # TODO 디자인 확인
             except Exception as e:
-                QtWidgets.QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Failed to open image: {str(e)}"
-                )
-                print(str(e))
+                self.show_error_msg(f"Failed to open image: {str(e)}")
 
     def load_image(self, _file_path: str):
         if _file_path:
@@ -156,9 +162,12 @@ class ImageWidget(QtWidgets.QWidget):
                 self.origin_img = QtGui.QPixmap(_file_path)
                 self.roi_layer = QtGui.QPixmap(self.origin_img.size())
                 self.roi_layer.fill(QtCore.Qt.transparent)
+
                 self.tmp_center = QtCore.QPointF(
                     self.origin_img.width() / 2, self.origin_img.height() / 2
                 )
+
+
                 self.sub_img_size = int(
                     max(min(self.image_label.width() / 3, self.image_label.height() / 3), 200)
                 )
@@ -174,8 +183,11 @@ class ImageWidget(QtWidgets.QWidget):
                     self.zoom = self.image_label.height() / self.origin_img.height()
                 self.zoom_min = self.zoom / 2
                 self.zoom_max = self.zoom * self.zoom_max_ratio
+
                 self.update_roi_layer()  # ROI 레이어 초기화
-                self.update_img()
+
+                self.update_image()
+
                 self.image_label.show()
                 self.tool_bar.show()
                 # 버튼 숨기기
@@ -185,12 +197,7 @@ class ImageWidget(QtWidgets.QWidget):
                 self.openImgSignal.emit(True)
             # TODO 디자인 확인
             except Exception as e:
-                QtWidgets.QMessageBox.critical(
-                    self,
-                    "Error",
-                    f"Failed to load image: {str(e)}"
-                )
-                print(str(e))
+                self.show_error_msg(f"Failed to load image: {str(e)}")
 
     def append_roi_layer(self, _ROI):
         if self.origin_img is None:
@@ -238,13 +245,12 @@ class ImageWidget(QtWidgets.QWidget):
             painter.drawRect(roi.rect)
         painter.end()
 
-    def update_img(self):
-        has_image, _ = self.project_config.get_image_settings()
+    def update_image(self):
+        has_image, _ = self.project_config.get_image_info()
         if not has_image or self.origin_img is None:
             return
 
         window_img_rect, crop_rect = self.get_crop_window_rect()
-
         cropped_origin_img = self.origin_img.copy(crop_rect)
         pixmap = QtGui.QPixmap(self.image_label.width(), self.image_label.height())
         pixmap.fill(QtCore.Qt.transparent)
@@ -406,7 +412,7 @@ class ImageWidget(QtWidgets.QWidget):
 
     def on_slider_value_changed(self, value):
         self.set_sub_img_scale(value / 100 + 0.5)
-        self.update_img()
+        self.update_image()
 
     def set_sub_img_scale(self, _sub_img_scale):
         self.sub_img_scale = _sub_img_scale
@@ -416,20 +422,20 @@ class ImageWidget(QtWidgets.QWidget):
     def on_checkbox_state_changed(self, state):
         if state:
             self.set_is_sub_img(True)
-            self.update_img()
+            self.update_image()
             pass
         else:
             self.set_is_sub_img(False)
-            self.update_img()
+            self.update_image()
             pass
 
     def set_cross_visible(self, visible: bool):
         self.cross_visible = visible
-        self.update_img()
+        self.update_image()
 
     def move_image(self, x, y):
         self.tmp_center = QtCore.QPointF(x, y)
-        self.update_img()
+        self.update_image()
 
     def set_tool_bar_roi_on(self, on: bool):
         self.tool_bar_roi_on = on

@@ -5,6 +5,7 @@ from core.roi import ROIs
 from utils.settings import Settings
 from core.project_manager import ProjectManager
 from core.temp_config_manager import TempConfigManager
+from ui.dialogs.save_dialog import SaveDialog
 import logging
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
@@ -25,7 +26,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.settings = Settings()
         self.temp_config_manager = TempConfigManager(self)
         self.project_manager = ProjectManager(self)
-        self.image_widget = ImageWidget(self.ROIs)
+        self.image_widget = ImageWidget(self.ROIs, self)
         self.log_widget = LogWidget(self.ROIs)
 
         self.init_ui()
@@ -73,6 +74,8 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
 
         self.is_init_view = False
         self.project_view_widget = self.create_project_view_widget()
+        image_widget_width, log_widget_width = self.settings.get_project_view_widget_width()
+        self.project_view_widget.setSizes([image_widget_width, log_widget_width])
         self.main_layout.addWidget(self.project_view_widget)
 
     def setup_window_properties(self):
@@ -90,7 +93,38 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.image_widget.project_config = self.project_config
         self.log_widget.project_config = self.project_config
         self.image_widget.tool_bar.project_config = self.project_config
-        self.image_widget.tool_bar.update_color_combo()
+        self.image_widget.tool_bar.update_tool_bar()
+
+    def show_save_dialog(self) -> bool:
+        """
+        Shows the save confirmation dialog.
+        
+        Returns:
+            bool: True if saved or discarded, False if cancelled
+        """
+        dialog = SaveDialog(self)
+        result = [False]  # Wrap in list to allow modification in inner functions
+        
+        def on_save():
+            self.temp_config_manager.save_config()
+            result[0] = True
+            dialog.accept()
+            
+        def on_discard():
+            self.temp_config_manager.remove_temp_config()
+            result[0] = True
+            dialog.accept()
+            
+        def on_cancel():
+            result[0] = False
+            dialog.reject()
+        
+        dialog.save_clicked.connect(on_save)
+        dialog.discard_clicked.connect(on_discard)
+        dialog.cancel_clicked.connect(on_cancel)
+        
+        dialog.exec()
+        return result[0]
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
@@ -99,10 +133,24 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         Args:
             event: 닫기 이벤트
         """
-        # TODO 저장여부 확인하고 저장할건지도 체크하자.
-        # 아래 것들은 최종적으로는 save 함수에서 처리
-        # 현재 윈도우 사이즈 및 splitter width 저장
         if hasattr(self, 'temp_config_manager') and self.temp_config_manager.is_exist_temp_config():
-            self.temp_config_manager.remove_temp_config()
-
+            if not self.show_save_dialog():
+                event.ignore()
+                return
+                
         super().closeEvent(event)
+
+    def resizeEvent(self, event: QtGui.QResizeEvent):
+        """
+        윈도우 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+        
+        Args:
+            event: 크기 변경 이벤트
+        """
+        # 부모 클래스의 resizeEvent 호출
+        super().resizeEvent(event)
+        
+        # 현재 윈도우 크기 저장
+        if hasattr(self, 'temp_config_manager') and self.temp_config_manager:
+            size = self.size()
+            self.temp_config_manager._set_window_size(size.width(), size.height())

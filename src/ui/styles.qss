@@ -3,25 +3,6 @@ QMainWindow {
     background-color: #1e1e1e;
 }
 
-/* 툴바 스타일 */
-#toolBar {
-    background-color: #2b2b2b;
-    border: none;
-    spacing: 5px;
-    padding: 5px;
-}
-
-#toolBar QToolButton {
-    background-color: transparent;
-    border: none;
-    padding: 5px;
-    border-radius: 3px;
-}
-
-#toolBar QToolButton:hover {
-    background-color: #3b3b3b;
-}
-
 /* 상태바 스타일 */
 #statusBar {
     background-color: #2b2b2b;

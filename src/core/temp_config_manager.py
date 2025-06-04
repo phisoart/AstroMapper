@@ -5,6 +5,7 @@ import sys
 from utils.helper import get_resource_path
 import logging
 from datetime import datetime
+
 class TempConfigManager:
     """
     프로젝트 폴더 내 임시 설정(.config.yaml) 파일을 관리하는 매니저 클래스
@@ -64,17 +65,18 @@ class TempConfigManager:
     def save_config(self):
         size = self.main_window.size()
         self._set_window_size(size.width(), size.height())
+        logging.info(f"size: {size}")
+
         # splitter 각 위젯 width 저장
-        if hasattr(self, 'project_view_widget'):
+        if hasattr(self.main_window, 'project_view_widget'):
             splitter_sizes = self.main_window.project_view_widget.sizes()
             if len(splitter_sizes) >= 2:
                 self._set_splitter_sizes(splitter_sizes)
+                logging.info(f"splitter_sizes: {splitter_sizes}")
         self._update_last_modified()
+        logging.info(f"update_last_modified: {self.temp_config['project']['last_modified']}")
         shutil.copy(self.temp_config_path, self.config_path)
         os.remove(self.temp_config_path)
-        logging.info(f"size: {size}")
-        logging.info(f"splitter_sizes: {splitter_sizes}")
-        logging.info(f"update_last_modified: {self.temp_config['project']['last_modified']}")
         self.temp_config = {}
 
     def _update_last_modified(self):
@@ -83,3 +85,13 @@ class TempConfigManager:
 
     def is_exist_temp_config(self):
         return os.path.exists(self.temp_config_path)
+
+    def remove_temp_config(self):
+        if os.path.exists(self.temp_config_path):
+            os.remove(self.temp_config_path)
+
+    def set(self, category, key, value):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        self.temp_config[category][key] = value
+        self._save()

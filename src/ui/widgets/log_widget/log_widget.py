@@ -350,7 +350,6 @@ class LogWidget(QtWidgets.QWidget):
 
     def save_legend_widths(self):
         if self.project_config:
-            # TODO: 저장 기능 추가
             self.project_config.set_log_widget_widths(self.legend_splitter.sizes())
 
     def create_btn_layout(self):
@@ -395,7 +394,7 @@ class LogWidget(QtWidgets.QWidget):
         if _file_name:
             with open(_file_name, "w") as file:
                 # 이미지 정보 저장
-                has_image, image_settings = self.project_config.get_image_settings() if self.project_config else (False, None)
+                has_image, image_settings = self.project_config.get_image_info() if self.project_config else (False, None)
                 if has_image and image_settings:
                     file.write("[IMG]\n")
                     file.write(f"name = {image_settings.get('name', '')}\n")
@@ -453,7 +452,7 @@ class LogWidget(QtWidgets.QWidget):
                         k, v = line.split('=', 1)
                         img_info[k.strip()] = v.strip()
                 # 현재 이미지 정보와 비교
-                has_image, image_settings = self.project_config.get_image_settings() if self.project_config else (False, None)
+                has_image, image_settings = self.project_config.get_image_info() if self.project_config else (False, None)
                 if not has_image or not image_settings:
                     msg_box = QtWidgets.QMessageBox(self)
                     msg_box.setWindowTitle("Error")
@@ -530,7 +529,7 @@ class LogWidget(QtWidgets.QWidget):
 
     def on_image_opened(self, opened: bool):
         if opened:
-            has_image, image_settings = self.project_config.get_image_settings()
+            has_image, image_settings = self.project_config.get_image_info()
             if has_image:
                 self.image_name_edit.setText(image_settings['name'])
                 # 이미지가 로드되면 체크박스도 자동 체크
@@ -557,7 +556,6 @@ class LogWidget(QtWidgets.QWidget):
                 for col, checkbox in dialog.checkboxes.items():
                     log_widget_settings[col] = checkbox.isChecked()
                 self.project_config.config["log_widget"] = log_widget_settings
-                # TODO: 저장 기능 추가
                 self.project_config.save_config()
                 self.update_log_frame()
 
@@ -732,7 +730,6 @@ class LogWidget(QtWidgets.QWidget):
                             row.splitter_widgets[8].setText(text)
 
     def on_center_to_roi(self, x, y):
-        # TODO: 실제 이미지 이동 함수와 연결
         print(f"Move image center to: ({x}, {y})")
         self.moveImageSignal.emit(x, y)
 

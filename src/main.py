@@ -39,7 +39,7 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 #     # 로그 위젯 -> 이미지 위젯 시그널
     log_widget.subImageChecked.connect(image_widget.on_checkbox_state_changed)
     log_widget.subImageSliderChanged.connect(image_widget.on_slider_value_changed)
-    log_widget.updateImgSignal.connect(image_widget.update_img)
+    log_widget.updateImgSignal.connect(image_widget.update_image)
     log_widget.appendROISignal.connect(image_widget.append_roi_layer)
     log_widget.removeROISignal.connect(image_widget.remove_roi_layer)
     log_widget.clearROISignal.connect(image_widget.clear_roi_layer)
@@ -56,22 +56,19 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 
 # TODO
 
-# 6. setting은 프로그램 안에, config및 로그는 프로젝트 폴더 안에 바로. 임사파일은 .붙여서 관리하고 꺼질 때 삭제.
-
 # Undo 기능 추가 (10번까지)
-# ROI관련 - 체크, 색, note, sorting순서, 삭제, 이동, 추가, 초기화, 웰정보
-# legend 사이즈 및 체크 여부
-# 레퍼런스 관련 - 입력여부, 값
-# tool 정보
-# 이미지 이동 (스크롤은 불가)
-# 서브 이미지 사이즈 및 체크 여부
+# (setting)ROI관련 - 체크, 색, note, sorting순서, 삭제, 이동, 추가, 초기화, 웰정보
+# (setting)legend 사이즈 및 체크 여부
+# (setting)tool 정보
+
 
 # 세이브 기능 구현 (저장할때 한번만 하면됨)
 # undo에 없는데 추가 필요한 것.
 # 윈도우 사이즈 (image, log 사이즈까지)
-# 현재 줌정도
-# 현재 중앙 위치
 
+# recent프로젝트에서 열 때 없으면 없다고 알려주고 삭제
+
+# 이미 열린상태에서 open/close하는건 담에하자.
 # 처음 윈도우 열거나 새로 로드하면 가운데에 정렬되도록.
 
 # TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
@@ -90,6 +87,8 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 # 7. 라지 이미지 대응
 
 # 11. 셀소터 및 이미지 분석 기능 추가.
+
+# save as 기능 추가
 
 def main():
     """애플리케이션의 메인 진입점입니다."""
