@@ -206,6 +206,8 @@ class ImageWidget(QtWidgets.QWidget):
     def append_roi_layer(self, _ROI):
         if self.origin_img is None:
             return
+        if not _ROI.checked:
+            return
         painter = QtGui.QPainter(self.roi_layer)
         # pen = QtGui.QPen(_ROI.color, 1)
 

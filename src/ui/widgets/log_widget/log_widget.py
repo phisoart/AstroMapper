@@ -640,6 +640,8 @@ class LogWidget(QtWidgets.QWidget):
                 for i, (widget, is_visible) in enumerate(zip(row.splitter_widgets, point_info_visible)):
                     widget.setVisible(is_visible)
             row.splitter.update()
+            row.selectedChanged.connect(self.on_row_selected)
+            row.centerToROI.connect(self.on_center_to_roi)
             self.scroll_layout.insertWidget(idx, row)
             self.log_rows.append(row)
 
@@ -650,7 +652,6 @@ class LogWidget(QtWidgets.QWidget):
         # 5. 마지막에 stretch가 없으면 추가
         if self.scroll_layout.count() == roi_count:
             self.scroll_layout.addStretch()
-
 
     def show_reference_point_dialog(self):
         dialog = ReferencePointDialog(self)

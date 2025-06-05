@@ -54,7 +54,7 @@ class ReferencePointDialog(QtWidgets.QDialog):
         main_layout.addLayout(point2_row)
 
         main_layout.addStretch(1)
-        btn_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonㅉBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        btn_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         btn_box.accepted.connect(self.accept)
         btn_box.rejected.connect(self.reject)
         main_layout.addWidget(btn_box) 

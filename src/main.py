@@ -54,13 +54,9 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 #     log_widget.extract_signal.connect(image_widget.extract_cosmosort_protocol)
 
 # TODO
-
-
 # 4. 레퍼런스 기능 추가하기 - reference dialog 기능 추가
 # save버튼시 생기는 dialog 기능 추가
 # 6. ROIs들 이미지 출력하는 기능 추가
-
-# 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
 
 # Undo 기능 추가 (10번까지)
 # (setting)ROI관련 - 체크, 색, note, sorting순서, 삭제, 이동, 추가, 초기화, 웰정보
@@ -71,6 +67,7 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 # 이미 파일 열린상태에서 여는거는 일단 추후에
 
 # TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
+# TOOL - 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
 
 # 이미지 대응 ->
 # 6. svs 이미지 대응 -> svs로드해서 이미지로 받으면 추후 프로세스 동일!
