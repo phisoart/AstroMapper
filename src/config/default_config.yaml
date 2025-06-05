@@ -44,3 +44,4 @@ log_widget:
   "Note": true
   "Delete": true
   widths: [20, 40, 40, 40, 40, 40, 50, 115, 144, 24]
+  ROI: []

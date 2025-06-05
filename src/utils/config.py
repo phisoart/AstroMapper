@@ -148,11 +148,6 @@ class ProjectConfig:
                 visible_list.append(log_widget_config.get(col, True))  # 설정이 없으면 True 
         return visible_list
 
-    def set_log_widget_widths(self, widths: list):
-        self.config.setdefault("log_widget", {})
-        self.config["log_widget"]["widths"] = widths
-        self.save_config()
-
     def get_log_widget_widths(self) -> list:
         print(f"widths: {self.config.get('log_widget', {}).get('widths', [])}")
         return self.config.get("log_widget", {}).get("widths", [])

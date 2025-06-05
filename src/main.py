@@ -32,7 +32,6 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
     image_widget.openImgSignal.connect(log_widget.openImgSignal)
     image_widget.tool_bar.sameWellToggled.connect(ROIs.set_is_same_well)
     image_widget.tool_bar.roiToggled.connect(image_widget.set_tool_bar_roi_on)
-#     image_widget.update_log_signal.connect(log_widget.update_log_entries)
 #     image_widget.set_image_signal.connect(log_widget.set_image_name)
 #     image_widget.connect_signal.connect(log_widget.replace_log_buttons_layout)
     
@@ -44,7 +43,7 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
     log_widget.removeROISignal.connect(image_widget.remove_roi_layer)
     log_widget.clearROISignal.connect(image_widget.clear_roi_layer)
     log_widget.moveImageSignal.connect(image_widget.move_image)
-
+    log_widget.updateROISignal.connect(image_widget.update_roi_layer)
     ROIs.rois_changed.connect(log_widget.on_rois_changed)
 
 #     log_widget.image_upload_requested.connect(image_widget.open_image)
@@ -56,39 +55,31 @@ def connect_signals(image_widget: ImageWidget, log_widget: LogWidget, ROIs: ROIs
 
 # TODO
 
-# Undo 기능 추가 (10번까지)
-# (setting)ROI관련 - 체크, 색, note, sorting순서, 삭제, 이동, 추가, 초기화, 웰정보
-# (setting)legend 사이즈 및 체크 여부
-# (setting)tool 정보
-
-
-# 세이브 기능 구현 (저장할때 한번만 하면됨)
-# undo에 없는데 추가 필요한 것.
-# 윈도우 사이즈 (image, log 사이즈까지)
-
-# recent프로젝트에서 열 때 없으면 없다고 알려주고 삭제
-
-# 이미 열린상태에서 open/close하는건 담에하자.
-# 처음 윈도우 열거나 새로 로드하면 가운데에 정렬되도록.
-
-# TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
 
 # 4. 레퍼런스 기능 추가하기 - reference dialog 기능 추가
-
 # save버튼시 생기는 dialog 기능 추가
 # 6. ROIs들 이미지 출력하는 기능 추가
 
 # 박스 선택하면 드래그로 이동 되도록 및 사이즈 조절 되게
 
-# 레퍼런스 등록되면 실제 길이와 변환 가능하도록.
+# Undo 기능 추가 (10번까지)
+# (setting)ROI관련 - 체크, 색, note, sorting순서, 삭제, 이동, 추가, 초기화, 웰정보
+# (setting)legend 사이즈 및 체크 여부
+
+# settings_btn 구현
+# save as 기능 추가
+# 이미 파일 열린상태에서 여는거는 일단 추후에
+
+# TOOL - 5. 영역선정 시에 이미지에 글씨 추가하기 - 글씨 크기를 조절할 수 있어야 함.
 
 # 이미지 대응 ->
 # 6. svs 이미지 대응 -> svs로드해서 이미지로 받으면 추후 프로세스 동일!
 # 7. 라지 이미지 대응
 
+# 레퍼런스 등록되면 실제 길이와 변환 가능하도록.
+
 # 11. 셀소터 및 이미지 분석 기능 추가.
 
-# save as 기능 추가
 
 def main():
     """애플리케이션의 메인 진입점입니다."""

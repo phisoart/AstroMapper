@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.temp_config_manager import TempConfigManager
+    from ui.main_window import AstromapperMainWindow
 
 def setup_logging(project_dir: str):
     formatter = logging.Formatter('[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
@@ -27,7 +28,7 @@ def setup_logging(project_dir: str):
 
 
 class ProjectManager:
-    def __init__(self, main_window):
+    def __init__(self, main_window: 'AstromapperMainWindow'):
         self.main_window = main_window
         self.settings = Settings()
         self.temp_config_manager: 'TempConfigManager' = main_window.temp_config_manager
@@ -68,15 +69,15 @@ class ProjectManager:
         _has_img, _img_info = self.main_window.project_config.get_image_info()
         if _has_img:
             self.main_window.image_widget.load_image(_img_info["path"])
-        self.main_window.log_widget.update_log_frame()
+        else:
+            self.main_window.image_widget.show_open_image_btn()
+        self.main_window.log_widget.update_log_frame(is_init=True)
         self.main_window.show_project_view_widget()
 
     def open_project(self, is_new: bool = False, _project_dir: str = None):
-        # TODO: make save_current_project
-        # 이미 프로젝트가 열려있는 경우도 확인하자.
-
-        # if not self.save_current_project():
-            # return 
+        if hasattr(self.main_window, 'temp_config_manager') and self.main_window.temp_config_manager.is_exist_temp_config():
+            if not self.main_window.show_save_dialog():
+                return
         if _project_dir and not is_new:
             project_dir = _project_dir
         else:
@@ -113,13 +114,39 @@ class ProjectManager:
             window_height = settings_dict.get("window_height", 1100)
             image_widget_width = settings_dict.get("image_widget_width", 899)
             log_widget_width = settings_dict.get("log_widget_width", 599)
+            
+            # 윈도우 크기를 설정하고 화면 중앙에 위치시킴
             self.main_window.resize(window_width, window_height)
+            
+            # 화면 중앙에 윈도우 위치시키기
+            screen = QtWidgets.QApplication.primaryScreen()
+            screen_geometry = screen.availableGeometry()
+            window_geometry = self.main_window.geometry()
+            center_x = (screen_geometry.width() - window_geometry.width()) // 2
+            center_y = (screen_geometry.height() - window_geometry.height()) // 2
+            self.main_window.move(center_x, center_y)
+            
             self.main_window.project_view_widget.setSizes([image_widget_width, log_widget_width])
             logging.info(f"open project: {project_dir}")
+        self.save_current_project()
 
     def open_recent_project(self, project_dir):
         if os.path.exists(project_dir):
             self.open_project(is_new=False, _project_dir=project_dir) 
+        else:
+            self.show_error_msg("Project not found.")
+            self.remove_from_recent_projects(project_dir)
+
+    def remove_from_recent_projects(self, project_dir):
+        """최근 프로젝트 목록에서 지정된 프로젝트를 제거합니다."""
+        recent_projects = self.main_window.settings.get_recent_projects()
+        if project_dir in recent_projects:
+            recent_projects.remove(project_dir)
+            self.main_window.settings.set("project.recent_projects", recent_projects)
+            self.main_window.settings.save_settings()
+            logging.info(f"Removed from recent projects: {project_dir}")
+            if self.main_window.is_init_view:
+                self.main_window.init_widget.refresh_recent_list()
 
     def save_current_project(self):
         if self.main_window.temp_config_manager:

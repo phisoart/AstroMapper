@@ -15,8 +15,8 @@ darwin:
   log_widget_width: 399
 
 sub_folder:
-  image_folder: image
-  result_folder: result
+  image_folder: images
+  result_folder: results
 
 project:
   recent_projects: []

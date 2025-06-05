@@ -1,18 +1,25 @@
 import os
 from PySide6 import QtWidgets, QtCore, QtGui
+from core import project_manager
 from utils.helper import get_resource_path, open_webpage
 from ui.dialogs.license_dialog import LicenseDialog
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.project_manager import ProjectManager
+    from ui.main_window import AstromapperMainWindow
 
 class TitleBar(QtWidgets.QMenuBar):
     """커스텀 타이틀바 위젯입니다."""
     
-    def __init__(self, parent=None, project_manager=None):
+    def __init__(self, parent=None, project_manager: 'ProjectManager' = None):
         super().__init__(parent)
+        self.main_window: 'AstromapperMainWindow' = parent
         self.setFixedHeight(30)
-        self.project_manager = project_manager
+        self.project_manager: 'ProjectManager' = project_manager
         self.load_styles()
         self.init_ui()
         self.drag_position = None
@@ -88,7 +95,7 @@ class TitleBar(QtWidgets.QMenuBar):
         self.save_project_action = QAction("Save Project", self)
         self.save_project_action.setShortcut("Ctrl+S")
         self.project_menu.addAction(self.save_project_action)
-        self.save_project_action.setEnabled(True)
+        self.save_project_action.setEnabled(False)
         self.save_project_action.triggered.connect(self.project_manager.save_current_project)
 
 
@@ -156,11 +163,13 @@ class TitleBar(QtWidgets.QMenuBar):
         self.save_tmp_protocol_action = QAction("Save tmp Protocol", self)
         self.save_tmp_protocol_action.setShortcut("Ctrl+Shift+S")
         self.protocol_menu.addAction(self.save_tmp_protocol_action)
+        self.save_tmp_protocol_action.triggered.connect(self.main_window.log_widget.tmp_protocol_save)
         self.save_tmp_protocol_action.setEnabled(False)
 
         self.load_tmp_protocol_action = QAction("Load tmp Protocol", self)
         self.load_tmp_protocol_action.setShortcut("Ctrl+Shift+L")
         self.protocol_menu.addAction(self.load_tmp_protocol_action)
+        self.load_tmp_protocol_action.triggered.connect(self.main_window.log_widget.tmp_protocol_load)
         self.load_tmp_protocol_action.setEnabled(False)
 
         self.protocol_menu.addSeparator()
@@ -169,11 +178,6 @@ class TitleBar(QtWidgets.QMenuBar):
         self.save_cx_protocol_action.setShortcut("Ctrl+Shift+S")
         self.protocol_menu.addAction(self.save_cx_protocol_action)
         self.save_cx_protocol_action.setEnabled(False)
-
-        self.load_cx_protocol_action = QAction("Load cxProtocol", self)
-        self.load_cx_protocol_action.setShortcut("Ctrl+Shift+L")
-        self.protocol_menu.addAction(self.load_cx_protocol_action)
-        self.load_cx_protocol_action.setEnabled(False)
 
         return self.protocol_menu
 
@@ -204,7 +208,7 @@ class TitleBar(QtWidgets.QMenuBar):
         self.help_menu = QMenu("Help", self)
         self.report_issue_action = QAction("Report Issue", self)
         self.report_issue_action.triggered.connect(lambda: open_webpage("https://meteorbiotech.com/contact-us"))
-        self.report_issue_action.setEnabled(False)
+        self.report_issue_action.setEnabled(True)
         self.help_menu.addAction(self.report_issue_action)
 
         self.license_action = QAction("View License", self)
@@ -238,6 +242,19 @@ class TitleBar(QtWidgets.QMenuBar):
         close_button.clicked.connect(self.window().close)
         button_layout.addWidget(close_button)
         return button_layout
+
+    def toggle_init_view(self):
+        self.save_project_action.setEnabled(True)
+
+        self.copy_action.setEnabled(True)
+        self.paste_action.setEnabled(True)
+        self.cut_action.setEnabled(True)
+
+        self.save_tmp_protocol_action.setEnabled(True)
+        self.load_tmp_protocol_action.setEnabled(True)
+
+        self.save_cx_protocol_action.setEnabled(True)
+
 
     def show_license_dialog(self):
         """라이선스 다이얼로그를 표시합니다."""

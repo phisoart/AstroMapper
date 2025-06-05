@@ -70,7 +70,6 @@ class ToolBar(QtWidgets.QToolBar):
             self.cross_visible = _checked
         else:
             self.cross_visible = not self.cross_visible
-        logging.info(f"toggle_cross: {_checked}")
         logging.info(f"toggle_cross: {self.cross_visible}")
         self.temp_config_manager.set("tool", "cross_visible", self.cross_visible)
         self.crossToggled.emit(self.cross_visible)
@@ -135,7 +134,7 @@ class ToolBar(QtWidgets.QToolBar):
         if color_name:
             self.color_combo.setCurrentText(color_name)
 
-    def update_tool_bar(self):
+    def initialize_tool_bar(self):
         cross_visible = self.project_config.get("tool", "cross_visible")
         same_well_on = self.project_config.get("tool", "same_well_on")
         roi_on = self.project_config.get("tool", "roi_on")

@@ -49,7 +49,7 @@ class ROIs(QtCore.QObject):  # QObject 상속
             print(f"Index {index} is out of range.")
             return None
 
-    def appendROI(self, _ROI):
+    def appendROI(self, _ROI, signal: bool = True):
         _ROI.x = _ROI.rect.x()
         _ROI.y = _ROI.rect.y()
         _ROI.width = _ROI.rect.width()
@@ -72,8 +72,8 @@ class ROIs(QtCore.QObject):  # QObject 상속
                     _ROI.well = "A01"
         self.__ROIs.append(_ROI)
         self.__len += 1
-        print(_ROI)
-        self.rois_changed.emit()  # 시그널 발생
+        if signal:
+            self.rois_changed.emit()  # 시그널 발생
 
     def removeROI(self, index):
         if index < 0 or index >= self.__len:

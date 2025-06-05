@@ -95,3 +95,58 @@ class TempConfigManager:
         self._load_temp_config()
         self.temp_config[category][key] = value
         self._save()
+
+    def set_config(self, category, config):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        self.temp_config[category] = config
+        self._save()
+
+    def get_config(self, category):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        return self.temp_config.get(category, {})
+
+    def set_log_widget_widths(self, widths: list):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        self.temp_config["log_widget"]["widths"] = widths
+        self._save()
+
+    def get_log_widget_widths(self):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        return self.temp_config["log_widget"]["widths"]
+
+    def get_point_info_visible(self) -> list:
+        self._ensure_temp_config()
+        self._load_temp_config()
+
+        try:
+            point_info_path = get_resource_path(os.path.join("res", "data", "point_info.json"))
+            with open(point_info_path, "r", encoding="utf-8") as f:
+                point_info = json.load(f)["point_info"]
+        except Exception:
+            point_info = ["checkbox","#", "X", "Y", "Width", "Height", "Well", "Color", "Note", "Delete"]
+        
+        # project_config의 log_widget 설정에서 visible 상태 가져오기
+        log_widget_config = self.temp_config.get("log_widget", {})
+        
+        # 각 컬럼의 visible 상태 설정
+        visible_list = []
+        for col in point_info:
+            if col == "":  # 빈 문자열인 경우 무조건 True
+                visible_list.append(True)
+            else:
+                visible_list.append(log_widget_config.get(col, True))  # 설정이 없으면 True 
+        return visible_list
+
+    def get_color(self):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        return self.temp_config["tool"]["color"]
+
+    def get_color_name(self):
+        self._ensure_temp_config()
+        self._load_temp_config()
+        return self.temp_config["tool"]["color_name"]

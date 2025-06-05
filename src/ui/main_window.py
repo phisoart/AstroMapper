@@ -27,7 +27,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.temp_config_manager = TempConfigManager(self)
         self.project_manager = ProjectManager(self)
         self.image_widget = ImageWidget(self.ROIs, self)
-        self.log_widget = LogWidget(self.ROIs)
+        self.log_widget = LogWidget(self.ROIs, self)
 
         self.init_ui()
 
@@ -73,6 +73,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
                 widget.deleteLater()
 
         self.is_init_view = False
+        self.title_bar.toggle_init_view()
         self.project_view_widget = self.create_project_view_widget()
         image_widget_width, log_widget_width = self.settings.get_project_view_widget_width()
         self.project_view_widget.setSizes([image_widget_width, log_widget_width])
@@ -93,7 +94,7 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self.image_widget.project_config = self.project_config
         self.log_widget.project_config = self.project_config
         self.image_widget.tool_bar.project_config = self.project_config
-        self.image_widget.tool_bar.update_tool_bar()
+        self.image_widget.tool_bar.initialize_tool_bar()
 
     def show_save_dialog(self) -> bool:
         """

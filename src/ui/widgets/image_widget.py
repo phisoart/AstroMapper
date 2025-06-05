@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 class ImageWidget(QtWidgets.QWidget):
     openImgSignal = QtCore.Signal(bool)  # 사용자 정의 시그널
-    updateLogSignal = QtCore.Signal()
     connectSignal = QtCore.Signal(bool)
 
     def __init__(self, ROIs: ROIs, main_window):
@@ -199,6 +198,11 @@ class ImageWidget(QtWidgets.QWidget):
             except Exception as e:
                 self.show_error_msg(f"Failed to load image: {str(e)}")
 
+    def show_open_image_btn(self):
+        self.open_btn.show()
+        self.image_label.hide()
+        self.tool_bar.hide()
+
     def append_roi_layer(self, _ROI):
         if self.origin_img is None:
             return
@@ -235,14 +239,15 @@ class ImageWidget(QtWidgets.QWidget):
         if self.origin_img is None:
             return
         painter = QtGui.QPainter(self.roi_layer)
-        for roi in self.ROIs.getROIs():
-            pen = QtGui.QPen(roi.color, 1)
-            painter.setPen(pen)
-            half_transparent_color = QtGui.QColor(roi.color)
-            half_transparent_color.setAlpha(50)
-            brush = QtGui.QBrush(half_transparent_color)
-            painter.setBrush(brush)
-            painter.drawRect(roi.rect)
+        for roi in self.ROIs.getROIs():  
+            if roi.checked:
+                pen = QtGui.QPen(QtCore.Qt.NoPen)
+                painter.setPen(pen)
+                half_transparent_color = QtGui.QColor(roi.color)
+                half_transparent_color.setAlpha(50)
+                brush = QtGui.QBrush(half_transparent_color)
+                painter.setBrush(brush)
+                painter.drawRect(roi.rect)
         painter.end()
 
     def update_image(self):
@@ -271,7 +276,7 @@ class ImageWidget(QtWidgets.QWidget):
         if self.is_sub_img:
             self.update_sub_img(painter, crop_rect, self.sub_img_scale)
         if self.select_roi_on:
-            color_hex = self.project_config.get_color()
+            color_hex = self.temp_config_manager.get_color()
             pen = QtGui.QPen(QtGui.QColor(color_hex), 1)
             painter.setPen(pen)
             painter.drawRect(self.drawing_rect)

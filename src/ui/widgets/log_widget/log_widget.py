@@ -7,6 +7,14 @@ from ui.dialogs.settings_dialog import SettingsDialog
 from .clickable_label import ClickableLabel
 from .log_row_widget import LogRowWidget
 from ui.dialogs.reference_point_dialog import ReferencePointDialog
+from ui.dialogs.error_dialog import ErrorDialog
+
+from typing import TYPE_CHECKING
+import logging
+
+if TYPE_CHECKING:
+    from utils.config import ProjectConfig
+    from core.temp_config_manager import TempConfigManager
 
 class LogWidget(QtWidgets.QWidget):
     openImgSignal = QtCore.Signal(bool)  # 사용자 정의 시그널
@@ -16,63 +24,45 @@ class LogWidget(QtWidgets.QWidget):
     appendROISignal = QtCore.Signal(ROI)
     removeROISignal = QtCore.Signal(ROI)
     clearROISignal = QtCore.Signal()
+    updateROISignal = QtCore.Signal()
     moveImageSignal = QtCore.Signal(int, int)
 
     # setImgSignal = QtCore.Signal(str)  # 사용자 정의 시그널
-    # updateLogSignal = QtCore.Signal()
     # connectSignal = QtCore.Signal(bool)
 
-    def __init__(self, ROIs):
+    def __init__(self, ROIs, main_window):
         super().__init__()
+        self.main_window = main_window
+        self.temp_config_manager:TempConfigManager = main_window.temp_config_manager
+
         self.ROIs = ROIs  
-        self.project_config = None
+        self.project_config:ProjectConfig = None
         
         self.legend_widgets = []
         self.log_rows = []
         self.selected_rows = []
         self.sort_states = {}  # {col_idx: True(asc)/False(desc)}
         self.sort_col = None
-        style_path = get_resource_path(os.path.join("src", "ui", "styles", "message_box", "critical.qss"))
-        if os.path.exists(style_path):
-            with open(style_path, "r", encoding="utf-8") as f:
-                self.message_box_style = f.read()
 
         try:
             color_info_path = get_resource_path(os.path.join("res", "data", "color.json"))
             with open(color_info_path, "r", encoding="utf-8") as f:
                 self.color_dict = json.load(f)
         except Exception:
-            self.color_dict = {
-                "Red": "#FF0000",
-                "Green": "#00FF00",
-                "Blue": "#0000FF"
-            }
-        # 전체 위젯 및 주요 성분 테두리 제거 스타일 적용
-        self.setStyleSheet('''
-            QWidget#logWidget, QFrame, QSplitter, QLabel, QLineEdit, QComboBox, QPushButton, QCheckBox {
-                border: none !important;
-                outline: none !important;
-                background: transparent;
-            }
-            QSplitter::handle {
-                background: #fff !important;
-                border: none !important;
-            }
-            QWidget#logRowWidget {
-                background: transparent;
-            }
-            QWidget#logRowWidget:hover {
-                background: #333333;
-            }
-        ''')
+            self.color_dict = {}
+
         self.setObjectName("logWidget")
-        self.load_styles()
+        # self.load_styles()
         self.init_ui()
 
         # openImgSignal이 True일 때 이미지 이름을 로그에 출력
         self.openImgSignal.connect(self.on_image_opened)
         self.sub_image_checkbox.stateChanged.connect(self.on_sub_image_checked)
         self.sub_image_slider.valueChanged.connect(self.on_sub_image_slider_changed)
+
+    def show_error_dialog(self, message):
+        error_dialog = ErrorDialog(message)
+        error_dialog.exec_()
 
     def load_styles(self):
         """QSS 스타일시트를 로드합니다."""
@@ -94,13 +84,13 @@ class LogWidget(QtWidgets.QWidget):
         log_label.setObjectName("logLabel")
         log_label_layout.addWidget(log_label)
         log_label_layout.addStretch(1)
-        settings_btn = QtWidgets.QPushButton()
-        settings_btn.setIcon(QtGui.QIcon(get_resource_path(os.path.join("res", "images", "icons", "settings.svg"))))
-        settings_btn.setIconSize(QtCore.QSize(20, 20))
-        settings_btn.setFixedSize(28, 28)
-        settings_btn.setStyleSheet("background: transparent; border: none;")
-        settings_btn.clicked.connect(self.show_settings_dialog)  # 설정 다이얼로그 연결
-        log_label_layout.addWidget(settings_btn)
+        # TODO: 나중에 구현
+        # settings_btn = QtWidgets.QPushButton()
+        # settings_btn.setIcon(QtGui.QIcon(get_resource_path(os.path.join("res", "images", "icons", "settings.svg"))))
+        # settings_btn.setIconSize(QtCore.QSize(20, 20))
+        # settings_btn.setFixedSize(28, 28)
+        # settings_btn.clicked.connect(self.show_settings_dialog)  # 설정 다이얼로그 연결
+        # log_label_layout.addWidget(settings_btn)
         main_layout.addLayout(log_label_layout)
 
         main_layout.addWidget(self.create_log_frame(), stretch=1)
@@ -228,6 +218,7 @@ class LogWidget(QtWidgets.QWidget):
                 legend_labels.append(x)
         self.column_count = len(legend_labels)
         self.legend_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        self.legend_splitter.setChildrenCollapsible(False)
         self.legend_splitter.setStyleSheet("""
             QSplitter {
                 background: transparent !important;
@@ -298,22 +289,48 @@ class LogWidget(QtWidgets.QWidget):
         self.legend_splitter.splitterMoved.connect(self.save_legend_widths)
         return legend_layout
 
-    def sync_row_splitters(self, pos, index):
-        sizes = self.legend_splitter.sizes()
-        for row in getattr(self, 'log_rows', []):
-            row.splitter.blockSignals(True)
-        for row in getattr(self, 'log_rows', []):
-            row.splitter.setSizes(sizes)
-        for row in getattr(self, 'log_rows', []):
-            row.splitter.blockSignals(False)
+    def sync_row_splitters(self):
+        if hasattr(self, 'legend_splitter'):
+            sizes = self.legend_splitter.sizes()
+            for row in getattr(self, 'log_rows', []):
+                row.splitter.setSizes(sizes)
 
-    def update_log_frame(self):
-        self.apply_saved_legend_widths()
-        self.update_legend_widget()
-        self.update_rois_widget()
+    def resizeEvent(self, event):
+        """위젯 크기가 변경될 때 호출되는 이벤트 핸들러"""
+        super().resizeEvent(event)
+        # 크기 변경 시 row splitter 동기화
+        if hasattr(self, 'legend_splitter'):
+            self.sync_row_splitters() 
 
-    def update_legend_widget(self):
-        self.point_info_visible = self.project_config.get_point_info_visible()
+    def update_log_frame(self, is_init: bool = False):
+        self.apply_saved_legend_widths(is_init)
+        self.update_legend_widget(is_init)
+        if is_init:
+            self.load_rois()
+            self.update_log_entries()
+            self.save_rois()
+        self.update_rois_widget(is_init)
+        self.sync_row_splitters()        
+
+
+
+
+    def apply_saved_legend_widths(self, is_init: bool = False):
+        if is_init:
+            config = self.project_config
+        else:
+            config = self.temp_config_manager
+
+        widths = config.get_log_widget_widths()
+        if widths:
+            self.legend_splitter.setSizes(widths)
+
+    def update_legend_widget(self, is_init: bool = False):
+        if is_init:
+            config = self.project_config
+        else:
+            config = self.temp_config_manager     
+        self.point_info_visible = config.get_point_info_visible()
 
         # legend 위젯들의 visible 상태 업데이트
         for i, (widget, is_visible) in enumerate(zip(self.legend_widgets, self.point_info_visible)):
@@ -322,42 +339,36 @@ class LogWidget(QtWidgets.QWidget):
         self.legend_layout.update()
         QtWidgets.QApplication.processEvents()  # UI 갱신    
 
-    def update_rois_widget(self):
+    def update_rois_widget(self, is_init: bool = False):
         """
         legend splitter의 크기, log row splitter의 크기, visible 상태를 모두 동기화합니다.
         숨겨진 컬럼의 width는 0으로 강제합니다.
         """
+        if is_init:
+            config = self.project_config
+        else:
+            config = self.temp_config_manager
+        self.sync_row_splitters()
         if hasattr(self, 'legend_splitter') and hasattr(self, 'log_rows'):
-            sizes = self.legend_splitter.sizes()
-            print(f"sizes: {sizes}")
-            point_info_visible = self.project_config.get_point_info_visible() if self.project_config else [True] * len(self.legend_widgets)
-            # 숨겨진 컬럼 width는 0으로
-            adjusted_sizes = [size if vis else 0 for size, vis in zip(sizes, point_info_visible)]
+            point_info_visible = config.get_point_info_visible() if config else [True] * len(self.legend_widgets)
             for row in self.log_rows:
-                row.splitter.setSizes(adjusted_sizes)
                 if hasattr(row, 'splitter_widgets'):
                     for i, (widget, is_visible) in enumerate(zip(row.splitter_widgets, point_info_visible)):
                         widget.setVisible(is_visible)
                 row.splitter.update()
 
-    def apply_saved_legend_widths(self):
-        if self.project_config:
-            widths = self.project_config.get_log_widget_widths()
-            if widths:
-                self.legend_splitter.setSizes(widths)
-                for row in getattr(self, 'log_rows', []):
-                    row.splitter.setSizes(widths)
+        self.sync_row_splitters()
 
     def save_legend_widths(self):
-        if self.project_config:
-            self.project_config.set_log_widget_widths(self.legend_splitter.sizes())
+        if self.temp_config_manager:
+            self.temp_config_manager.set_log_widget_widths(self.legend_splitter.sizes())
 
     def create_btn_layout(self):
         btn_layout = QtWidgets.QHBoxLayout()
         self.save_btn = QtWidgets.QPushButton("Save")
-        self.save_btn.clicked.connect(self.on_save_clicked)
+        self.save_btn.clicked.connect(self.tmp_protocol_save)
         self.load_btn = QtWidgets.QPushButton("Load")
-        self.load_btn.clicked.connect(self.on_load_clicked)
+        self.load_btn.clicked.connect(self.tmp_protocol_load)
         self.clear_btn = QtWidgets.QPushButton("Clear")
         self.clear_btn.clicked.connect(self.on_clear_clicked)
         for btn in [self.save_btn, self.load_btn, self.clear_btn]:
@@ -368,7 +379,7 @@ class LogWidget(QtWidgets.QWidget):
         btn_layout.addWidget(self.clear_btn)
         return btn_layout
 
-    def on_save_clicked(self):
+    def tmp_protocol_save(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.ReadOnly
         # project_dir 기본 경로로 사용
@@ -423,7 +434,7 @@ class LogWidget(QtWidgets.QWidget):
 
                     file.write(_str)
 
-    def on_load_clicked(self):
+    def tmp_protocol_load(self):
         default_dir = ""
         if self.project_config is not None:
             if hasattr(self.project_config, 'project_dir'):
@@ -454,14 +465,7 @@ class LogWidget(QtWidgets.QWidget):
                 # 현재 이미지 정보와 비교
                 has_image, image_settings = self.project_config.get_image_info() if self.project_config else (False, None)
                 if not has_image or not image_settings:
-                    msg_box = QtWidgets.QMessageBox(self)
-                    msg_box.setWindowTitle("Error")
-                    msg_box.setText("No image loaded in project.")
-                    msg_box.setStyleSheet(self.message_box_style)
-                    # 모든 자식 위젯에 스타일 강제 적용
-                    for child in msg_box.findChildren(QtWidgets.QWidget):
-                        child.setStyleSheet(self.message_box_style)
-                    msg_box.exec()
+                    self.show_error_dialog("No image loaded in project.")
                     return
                 # 비교: 이름, 사이즈, 포맷, 용량
                 cur_name = str(image_settings.get('name', ''))
@@ -469,14 +473,7 @@ class LogWidget(QtWidgets.QWidget):
                 cur_format = str(image_settings.get('format', ''))
                 cur_filesize = str(image_settings.get('size', ''))
                 if not (img_info.get('name') == cur_name and img_info.get('size') == cur_size and img_info.get('format') == cur_format and img_info.get('filesize') == cur_filesize):
-                    msg_box = QtWidgets.QMessageBox(self)
-                    msg_box.setWindowTitle("Error")
-                    msg_box.setText("Image info in protocol file does not match current project!\n\nCurrent: {} {} {} {}\nFile: {} {} {} {}".format(cur_name, cur_size, cur_format, cur_filesize, img_info.get('name'), img_info.get('size'), img_info.get('format'), img_info.get('filesize')))
-                    msg_box.setStyleSheet(self.message_box_style)
-                    # 모든 자식 위젯에 스타일 강제 적용
-                    for child in msg_box.findChildren(QtWidgets.QWidget):
-                        child.setStyleSheet(self.message_box_style)
-                    msg_box.exec()
+                    self.show_error_dialog("Image info in protocol file does not match current project!\n\nCurrent: {} {} {} {}\nFile: {} {} {} {}".format(cur_name, cur_size, cur_format, cur_filesize, img_info.get('name'), img_info.get('size'), img_info.get('format'), img_info.get('filesize')))
                     return
                 # [ROIs] 섹션 파싱
                 rois_section = content.split('[ROIs]')[1].strip()
@@ -487,6 +484,7 @@ class LogWidget(QtWidgets.QWidget):
                         n = int(line.split('=')[1].strip())
                         break
                 self.ROIs.clearROIs()
+                self.clearROISignal.emit()
                 for line in lines:
                     if line.startswith('P_'):
                         # P_0 = 157;135;90;90;A01;Red;1;1;
@@ -512,15 +510,15 @@ class LogWidget(QtWidgets.QWidget):
                         roi.color = QtGui.QColor(self.color_dict.get(color_name, "#FF0000"))
                         roi.note = note
                         roi.checked = checked
-                        self.ROIs.appendROI(roi)
-                # self.update_log_entries()
+                        self.ROIs.appendROI(roi, signal=False)
+                self.updateROISignal.emit()
+                self.update_log_entries()
                 self.updateImgSignal.emit(True)
+                self.save_rois()
+                # self.appendROISignal.emit(self.current_ROI)
+                # self.update_image()
             except Exception as e:
-                msg_box = QtWidgets.QMessageBox(self)
-                msg_box.setWindowTitle("Error")
-                msg_box.setText(f"Failed to load protocol file: {e}")
-                msg_box.setStyleSheet(self.message_box_style)
-                msg_box.exec()
+                self.show_error_dialog(f"Failed to load protocol file: {e}")
 
     def on_clear_clicked(self):
         self.clearROISignal.emit()
@@ -545,18 +543,17 @@ class LogWidget(QtWidgets.QWidget):
         dialog = SettingsDialog(self)
         # 현재 설정값으로 체크박스 상태 설정
         for col, checkbox in dialog.checkboxes.items():
-            if self.project_config:
-                log_widget_settings = self.project_config.get_settings("log_widget")
+            if self.temp_config_manager:
+                log_widget_settings = self.temp_config_manager.get_config("log_widget")
                 checkbox.setChecked(log_widget_settings.get(col, True))
         
         if dialog.exec() == QtWidgets.QDialog.Accepted:
             # 설정 저장
-            if self.project_config:
-                log_widget_settings = self.project_config.get_settings("log_widget")
+            if self.temp_config_manager:
+                log_widget_settings = self.temp_config_manager.get_config("log_widget")
                 for col, checkbox in dialog.checkboxes.items():
                     log_widget_settings[col] = checkbox.isChecked()
-                self.project_config.config["log_widget"] = log_widget_settings
-                self.project_config.save_config()
+                self.temp_config_manager.set_config("log_widget", log_widget_settings)
                 self.update_log_frame()
 
     def on_scrollbar_range_changed(self, min_val, max_val):
@@ -572,49 +569,88 @@ class LogWidget(QtWidgets.QWidget):
         else:
             # 스크롤바가 나타남
             last_widget.setFixedWidth(36)
-            
-    def resizeEvent(self, event):
-        """위젯 크기가 변경될 때 호출되는 이벤트 핸들러"""
-        super().resizeEvent(event)
-        # 크기 변경 시 row splitter 동기화
-        if hasattr(self, 'legend_splitter'):
-            self.sync_row_splitters(0, 0)  # pos와 index는 사용하지 않으므로 0으로 설정
+        
             
     def on_rois_changed(self):        
-        self.update_log_entries() 
-        # # 3. 변경 사항 저장 (필요한 경우)
-        # self.save_rois_state()
+        self.update_log_entries()
+        self.save_rois()
+
+    def save_rois(self):
+        if self.temp_config_manager:
+            roi_list = []
+            for roi in self.ROIs.getROIs():
+                roi_string = f"{roi.x};{roi.y};{roi.width};{roi.height};{roi.well};{roi.color_name};{roi.note};{1 if roi.checked else 0};"
+                roi_list.append(roi_string)
+            self.temp_config_manager.set("log_widget", "ROI", roi_list)
+        
+    def load_rois(self):
+        if self.project_config:
+            roi_data = self.project_config.get("log_widget", "ROI")
+            if roi_data:
+                for roi_string in roi_data:
+                    if roi_string.strip():
+                        parts = roi_string.strip(';').split(';')
+                        x = int(parts[0])
+                        y = int(parts[1])
+                        width = int(parts[2])
+                        height = int(parts[3])
+                        well = parts[4]
+                        color_name = parts[5]
+                        note = parts[6]
+                        checked = bool(int(parts[7]))
+                        
+                        roi = ROI()
+                        roi.x = x
+                        roi.y = y
+                        roi.width = width
+                        roi.height = height
+                        roi.rect = QtCore.QRect(x, y, width, height)
+                        roi.well = well
+                        roi.color_name = color_name
+                        roi.note = note
+                        roi.checked = checked
+                        roi.color = QtGui.QColor(self.color_dict.get(color_name, "#FF0000"))
+                                
+                        self.ROIs.appendROI(roi, signal=False)
+        self.updateROISignal.emit()
+
 
     def update_log_entries(self):
-        """ROIs의 정보로 로그 엔트리를 업데이트합니다."""
-        # 1. 기존 위젯/스페이서 모두 제거
-        while self.scroll_layout.count():
-            item = self.scroll_layout.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-        self.log_rows.clear()
+         # 1. ROI 리스트와 row 위젯 리스트의 길이 비교
+        rois = self.ROIs.getROIs()
+        roi_count = len(rois)
 
-        # 2. 새로운 로그 엔트리 추가
-        for i, roi in enumerate(self.ROIs.getROIs()):
-            row = LogRowWidget(i+1, roi, parent=self)
-            for j in range(row.splitter.count() - 1):
-                handle = row.splitter.handle(j + 1)
-                handle.setEnabled(False)
-                handle.setStyleSheet("background: transparent !important;")
-            row.splitter.setSizes(self.legend_splitter.sizes())
-            row.selectedChanged.connect(self.on_row_selected)
-            row.centerToROI.connect(self.on_center_to_roi)
+        # 2. row가 더 많으면 삭제
+        while len(self.log_rows) > roi_count:
+            row = self.log_rows.pop()
+            row.deleteLater()
+
+        # 3. row가 더 적으면 추가
+        while len(self.log_rows) < roi_count:
+            idx = len(self.log_rows)
+            row = LogRowWidget(idx+1, rois[idx], parent=self)
+                    # 1. splitter 사이즈 동기화
+            if hasattr(self, 'legend_splitter'):
+                sizes = self.legend_splitter.sizes()
+                row.splitter.setSizes(sizes)
+            # 2. 컬럼 visible 동기화
+            config = self.project_config if self.project_config else self.temp_config_manager
+            if hasattr(row, 'splitter_widgets') and config:
+                point_info_visible = config.get_point_info_visible()
+                for i, (widget, is_visible) in enumerate(zip(row.splitter_widgets, point_info_visible)):
+                    widget.setVisible(is_visible)
+            row.splitter.update()
+            self.scroll_layout.insertWidget(idx, row)
             self.log_rows.append(row)
-            self.scroll_layout.addWidget(row)
 
-        # 3. 마지막에 stretch 한 번만 추가
-        self.scroll_layout.addStretch()
+        # 4. 내용 갱신 (ROI 값이 바뀌었을 때만)
+        for idx, roi in enumerate(rois):
+            self.log_rows[idx].update_from_roi(roi)  # update_from_roi는 row 위젯에 새로 구현 필요
 
-    # def save_rois_state(self):
-    #     # TODO: 저장 기능 추가
-    #     self.project_config.set_rois(self.ROIs.getROIs())
-    #     self.project_config.save_config()
+        # 5. 마지막에 stretch가 없으면 추가
+        if self.scroll_layout.count() == roi_count:
+            self.scroll_layout.addStretch()
+
 
     def show_reference_point_dialog(self):
         dialog = ReferencePointDialog(self)
@@ -704,7 +740,7 @@ class LogWidget(QtWidgets.QWidget):
                 for row in list(self.selected_rows):
                     idx = self.log_rows.index(row)
                     self.ROIs.removeROI(idx)
-                self.update_log_entries()
+                self.on_rois_changed()
             # 2. Color change
             elif action in color_action_map:
                 color_name, color_hex = color_action_map[action]
@@ -758,9 +794,8 @@ class LogWidget(QtWidgets.QWidget):
         reverse = not self.sort_states[self.sort_col]
         # ROIs 내부 리스트를 직접 정렬하고, 그 결과를 받아 row 재생성
         self.ROIs.sort(key_func=idx_to_attr[self.sort_col], reverse=reverse)
-        self.update_log_entries()
-        # splitter width 동기화
-        self.sync_row_splitters(0, 0)
+        self.on_rois_changed()
+        self.sync_row_splitters()
 
     def update_legend_sort_indicator(self):
         # 정렬 방향 표시(▲/▼)

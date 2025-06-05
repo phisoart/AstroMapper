@@ -84,13 +84,12 @@ def mouseReleaseEvent(self: 'ImageWidget', event):
                 )
             self.current_ROI.rect = convert_qrect_window2image(self, current_rect)
             # hex 값을 QColor로 변환
-            color_hex = self.project_config.get_color()
-            self.current_ROI.color_name = self.project_config.get_color_name()
+            color_hex = self.temp_config_manager.get_color()
+            self.current_ROI.color_name = self.temp_config_manager.get_color_name()
             self.current_ROI.color = QtGui.QColor(color_hex)
             self.ROIs.appendROI(copy.deepcopy(self.current_ROI))
             self.append_roi_layer(self.current_ROI)
             self.update_image()
-            self.updateLogSignal.emit()
         else:
             self.select_roi_on = False
         event.accept()
@@ -194,6 +193,8 @@ def on_double_click(self: 'ImageWidget', event):
         event: QEvent
     """
     if event.type() == QtCore.QEvent.MouseButtonDblClick:
+        if self.tool_bar_roi_on:
+            return
         has_image, _ = self.project_config.get_image_info()
         if has_image and self.origin_img is not None:
             x = int((event.pos().x() - self.image_label.width() / 2) / self.zoom + self.tmp_center.x())

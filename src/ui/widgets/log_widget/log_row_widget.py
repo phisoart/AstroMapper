@@ -222,12 +222,18 @@ class LogRowWidget(QtWidgets.QWidget):
                 
         if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
             self.parent_widget.updateImgSignal.emit(True)
+        self.parent_widget.save_rois()
+
 
     def on_well_changed(self, text):
         self.ROI.well = text
+        self.parent_widget.save_rois()
+
 
     def on_note_changed(self, text):
         self.ROI.note = text
+        self.parent_widget.save_rois()
+
 
     def on_color_changed(self, color_name):
         hex_code = self.color_dict.get(color_name, "#FF0000")
@@ -239,6 +245,7 @@ class LogRowWidget(QtWidgets.QWidget):
 
         if self.parent_widget is not None and hasattr(self.parent_widget, "updateImgSignal"):
             self.parent_widget.updateImgSignal.emit(True)
+        self.parent_widget.save_rois()
 
     def on_delete_clicked(self, order):
         if self.parent_widget is not None and hasattr(self.parent_widget, "ROIs"):
@@ -286,3 +293,44 @@ class LogRowWidget(QtWidgets.QWidget):
 
     def contextMenuEvent(self, event):
         self.parent_widget.show_row_context_menu(self, event.globalPos())
+
+    def update_from_roi(self, roi, order=None):
+        """
+        ROI 객체의 값으로 row의 각 위젯을 갱신합니다.
+        order: 순서(인덱스)가 바뀌었을 경우 갱신할 값(옵션)
+        """
+        self.ROI = roi
+        # 0. 체크박스
+        self.splitter_widgets[0].blockSignals(True)
+        self.splitter_widgets[0].setChecked(roi.checked)
+        self.splitter_widgets[0].blockSignals(False)
+        # 1. 순서 라벨
+        if order is not None:
+            self.splitter_widgets[1].setText(str(order))
+        # 2~5. X, Y, W, H
+        self.splitter_widgets[2].setText(str(roi.x))
+        self.splitter_widgets[3].setText(str(roi.y))
+        self.splitter_widgets[4].setText(str(roi.width))
+        self.splitter_widgets[5].setText(str(roi.height))
+        # 6. Well 콤보박스
+        self.splitter_widgets[6].blockSignals(True)
+        self.splitter_widgets[6].setCurrentText(roi.well)
+        self.splitter_widgets[6].blockSignals(False)
+        # 7. Color 콤보박스
+        self.splitter_widgets[7].blockSignals(True)
+        color_name = roi.color_name
+        if color_name is None and hasattr(self, 'color_dict'):
+            # hex로부터 이름 역추적
+            roi_color_hex = roi.color.name().upper()
+            for name, hex_code in self.color_dict.items():
+                if hex_code.upper() == roi_color_hex:
+                    color_name = name
+                    break
+        if color_name:
+            self.splitter_widgets[7].setCurrentText(color_name)
+        self.splitter_widgets[7].blockSignals(False)
+        # 8. Note QLineEdit
+        self.splitter_widgets[8].blockSignals(True)
+        self.splitter_widgets[8].setText(roi.note)
+        self.splitter_widgets[8].blockSignals(False)
+        # 9. 삭제 버튼은 갱신 불필요
