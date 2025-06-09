@@ -30,7 +30,7 @@ class ProjectConfig:
     
     def _create_default_config(self):
         """기본 설정 파일을 생성합니다."""
-        default_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "default_config.yaml"))
+        default_config_path = get_resource_path(os.path.join("src", "config", "default_config.yaml"))
         try:
             with open(default_config_path, "r", encoding="utf-8") as f:
                 self.config = yaml.safe_load(f)
@@ -89,7 +89,6 @@ class ProjectConfig:
             
             # 설정 저장
             self.save_config()
-            self.update_last_modified()
             
         except Exception as e:
             print(f"이미지 정보 저장 중 오류 발생: {e}")

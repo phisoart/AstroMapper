@@ -12,17 +12,23 @@ class LogRowWidget(QtWidgets.QWidget):
         self.parent_widget = parent
         self.ROI = ROI  # ROI 객체를 멤버로 저장
         self.selected = False
+        self._hovered = False
         self.setMinimumHeight(28)
         self.setObjectName("logRowWidget")
         self.setCursor(QtCore.Qt.PointingHandCursor)
-        # 호버 효과를 위한 스타일시트 추가
+        self.setAttribute(QtCore.Qt.WA_Hover, True)  # hover 이벤트 활성화
+        self.setAutoFillBackground(False)  # 배경 자동 채우기 끔
+        # 배경색 없는 최소 스타일만 적용
+        self.setStyleSheet("border: none;")
+        self._apply_style()
+        # 기본/hover 스타일시트 적용
         self.setStyleSheet("""
             QWidget#logRowWidget {
                 background: #222222 !important;
                 border: none !important;
             }
             QWidget#logRowWidget:hover {
-                background: #333333 !important;
+                background: #333366 !important;
             }
         """)
 
@@ -257,26 +263,31 @@ class LogRowWidget(QtWidgets.QWidget):
 
     def set_selected(self, selected: bool):
         self.selected = selected
-        # if selected:
-        #     self.setStyleSheet("""
-        #         QWidget#logRowWidget {
-        #             background: #222222 !important;
-        #             border: 2px solid #FFA726 !important;
-        #         }
-        #         QWidget#logRowWidget:hover {
-        #             background: #ffffff !important;
-        #         }
-        #     """)
-        # else:
-        #     self.setStyleSheet("""
-        #         QWidget#logRowWidget {
-        #             background: #222222 !important;
-        #             border: none !important;
-        #         }
-        #         QWidget#logRowWidget:hover {
-        #             background: #ffffff !important;
-        #         }
-        #     """)
+        self.repaint()
+
+    def enterEvent(self, event):
+        self._hovered = True
+        self.repaint()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._hovered = False
+        self.repaint()
+        super().leaveEvent(event)
+
+    def paintEvent(self, event):
+        painter = QtGui.QPainter(self)
+        if self.selected:
+            painter.fillRect(self.rect(), QtGui.QColor("#444444"))  # 선택: 진회색
+        elif self._hovered:
+            painter.fillRect(self.rect(), QtGui.QColor("#333333"))  # hover: 중간 회색
+        else:
+            painter.fillRect(self.rect(), QtGui.QColor("#222222"))  # 기본: 거의 검정
+        super().paintEvent(event)
+
+    def _apply_style(self):
+        # 배경색은 paintEvent에서 처리, 여기서는 글자색 등만 관리
+        pass
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
