@@ -94,7 +94,13 @@ def main():
     
     # # 윈도우 표시
     window.show()
-    
+    # 화면 중앙에 윈도우 위치시키기
+    screen = QtWidgets.QApplication.primaryScreen()
+    screen_geometry = screen.availableGeometry()
+    window_geometry = window.geometry()
+    center_x = (screen_geometry.width() - window_geometry.width()) // 2
+    center_y = (screen_geometry.height() - window_geometry.height()) // 2
+    window.move(center_x, center_y)
     sys.exit(app.exec())
 
 if __name__ == "__main__":

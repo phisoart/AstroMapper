@@ -108,6 +108,12 @@ class ProjectManager:
                 folder_path = os.path.join(project_dir, folder)
                 os.makedirs(folder_path, exist_ok=True)
             logging.info(f"create project: {project_dir}")
+            screen = QtWidgets.QApplication.primaryScreen()
+            screen_geometry = screen.availableGeometry()
+            window_geometry = self.main_window.geometry()
+            center_x = (screen_geometry.width() - window_geometry.width()) // 2
+            center_y = (screen_geometry.height() - window_geometry.height()) // 2
+            self.main_window.move(center_x, center_y)
         else:
             settings_dict = self.main_window.project_config.get_window_size()
             window_width = settings_dict.get("window_width", 1500)

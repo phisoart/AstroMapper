@@ -7,6 +7,7 @@ from core.project_manager import ProjectManager
 from core.temp_config_manager import TempConfigManager
 from ui.dialogs.save_dialog import SaveDialog
 import logging
+import sys
 
 class AstromapperMainWindow(QtWidgets.QMainWindow):
     
@@ -14,7 +15,10 @@ class AstromapperMainWindow(QtWidgets.QMainWindow):
         self,
         parent: Optional[QtWidgets.QWidget] = None
     ):
-        super().__init__(parent, QtCore.Qt.FramelessWindowHint)
+        if sys.platform == "windows":
+            super().__init__(parent, QtCore.Qt.FramelessWindowHint)
+        else:
+            super().__init__(parent)
         self.is_init_view = True
         self.is_saved = True
         self.is_project = False
